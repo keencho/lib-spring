@@ -1,14 +1,20 @@
 package com.keencho.lib.spring.security.model;
 
+import org.springframework.security.core.GrantedAuthority;
+
 import javax.persistence.MappedSuperclass;
+import javax.persistence.Transient;
 import java.time.LocalDateTime;
+import java.util.Collection;
 
 @MappedSuperclass
 public abstract class KcAccountBaseModel {
 
+    @Transient
     public abstract int maxLoginAttemptCnt();
 
-    public static int i = 1;
+    @Transient
+    public abstract Collection<? extends GrantedAuthority> authorities();
 
     protected String loginId;
 
@@ -16,13 +22,13 @@ public abstract class KcAccountBaseModel {
 
     protected int loginAttemptCnt = 0;
 
-    protected boolean accountNonExpired;
+    protected boolean accountNonExpired = true;
 
-    protected boolean accountNonLocked;
+    protected boolean accountNonLocked = true;
 
-    protected boolean credentialsNonExpired;
+    protected boolean credentialsNonExpired = true;
 
-    protected boolean enabled;
+    protected boolean enabled = true;
 
     protected LocalDateTime dtCreatedAt = LocalDateTime.now();
 
@@ -51,72 +57,24 @@ public abstract class KcAccountBaseModel {
         this.password = password;
     }
 
-    public int getLoginAttemptCnt() {
-        return loginAttemptCnt;
-    }
-
-    public void setLoginAttemptCnt(int loginAttemptCnt) {
-        this.loginAttemptCnt = loginAttemptCnt;
-    }
-
     public boolean isAccountNonExpired() {
         return accountNonExpired;
-    }
-
-    public void setAccountNonExpired(boolean accountNonExpired) {
-        this.accountNonExpired = accountNonExpired;
     }
 
     public boolean isAccountNonLocked() {
         return accountNonLocked;
     }
 
-    public void setAccountNonLocked(boolean accountNonLocked) {
-        this.accountNonLocked = accountNonLocked;
-    }
-
     public boolean isCredentialsNonExpired() {
         return credentialsNonExpired;
-    }
-
-    public void setCredentialsNonExpired(boolean credentialsNonExpired) {
-        this.credentialsNonExpired = credentialsNonExpired;
     }
 
     public boolean isEnabled() {
         return enabled;
     }
 
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
-
-    public LocalDateTime getDtCreatedAt() {
-        return dtCreatedAt;
-    }
-
-    public void setDtCreatedAt(LocalDateTime dtCreatedAt) {
-        this.dtCreatedAt = dtCreatedAt;
-    }
-
-    public LocalDateTime getDtUpdatedAt() {
-        return dtUpdatedAt;
-    }
-
-    public void setDtUpdatedAt(LocalDateTime dtUpdatedAt) {
-        this.dtUpdatedAt = dtUpdatedAt;
-    }
-
-    public LocalDateTime getDtPasswordChangedAt() {
-        return dtPasswordChangedAt;
-    }
-
     public void setDtPasswordChangedAt(LocalDateTime dtPasswordChangedAt) {
         this.dtPasswordChangedAt = dtPasswordChangedAt;
-    }
-
-    public LocalDateTime getDtLastAccessedAt() {
-        return dtLastAccessedAt;
     }
 
     public void setDtLastAccessedAt(LocalDateTime dtLastAccessedAt) {
