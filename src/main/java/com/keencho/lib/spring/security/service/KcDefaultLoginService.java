@@ -1,5 +1,6 @@
 package com.keencho.lib.spring.security.service;
 
+import com.keencho.lib.spring.common.exception.KcSystemException;
 import com.keencho.lib.spring.security.exception.KcAccountDisabledException;
 import com.keencho.lib.spring.security.exception.KcAccountLockedException;
 import com.keencho.lib.spring.security.exception.KcAccountLongTermNotUsedException;
@@ -9,6 +10,8 @@ import com.keencho.lib.spring.security.model.KcAccountBaseModel;
 import com.keencho.lib.spring.security.model.KcSecurityAccount;
 import com.keencho.lib.spring.security.provider.KcAuthenticationProviderManager;
 import com.keencho.lib.spring.security.repository.KcAccountRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
@@ -19,6 +22,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import java.time.LocalDateTime;
 
 public abstract class KcDefaultLoginService<T extends KcAccountBaseModel, R extends KcAccountRepository<T, ID>, ID, D> implements KcLoginService<T, R, ID, D> {
+
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private final KcAuthenticationProviderManager authenticationProviderManager;
     private final KcLoginManager<T, R, ID> accountLoginManager;
@@ -37,6 +42,13 @@ public abstract class KcDefaultLoginService<T extends KcAccountBaseModel, R exte
 
         try {
             var authenticationProvider = authenticationProviderManager.getAuthenticationProvider(getAccountEntityClass());
+
+            // 코딩 잘못임. bean에 엔티티 클래스 / 매니저 등록 안함.
+            if (authenticationProvider == null) {
+                logger.error("system error: authentication provider manager doesn't have target entity class. check your bean configuration");
+                throw new KcSystemException();
+            }
+
             authentication = authenticationProvider.authenticate(token);
 
             // 여기까지 들어왔으면 아이디 / 비밀번호는 일치한다는 의미임
@@ -69,6 +81,8 @@ public abstract class KcDefaultLoginService<T extends KcAccountBaseModel, R exte
             throw new KcAccountLockedException();
         } catch (DisabledException ex) {
             throw new KcAccountDisabledException();
+        } catch (KcSystemException ex) {
+            throw new KcSystemException();
         } catch (Exception ex) {
             throw new KcLoginFailureException("login failure");
         }
