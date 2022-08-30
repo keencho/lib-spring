@@ -13,17 +13,17 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-    public abstract class KcDefaultLoginService<T extends KcAccountBaseModel, R extends KcAccountRepository<T, ID>, ID, D> implements KcLoginService<T, R, ID, D> {
+public abstract class KcDefaultLoginService<T extends KcAccountBaseModel, R extends KcAccountRepository<T, ID>, ID, D> implements KcLoginService<T, R, ID, D> {
 
-        private final KcAuthenticationProviderManager authenticationProviderManager;
-        private final KcAccountLoginManager<T, R, ID> accountLoginManager;
+    private final KcAuthenticationProviderManager authenticationProviderManager;
+    private final KcAccountLoginManager<T, R, ID> accountLoginManager;
 
-        public KcDefaultLoginService(KcAuthenticationProviderManager authenticationProviderManager, KcAccountLoginManager<T, R, ID> accountLoginManager) {
+    public KcDefaultLoginService(KcAuthenticationProviderManager authenticationProviderManager, KcAccountLoginManager<T, R, ID> accountLoginManager) {
         this.authenticationProviderManager = authenticationProviderManager;
         this.accountLoginManager = accountLoginManager;
     }
 
-    protected abstract Class<T> getAccountEntityClass();
+    public abstract Class<T> getAccountEntityClass();
 
     @Override
     public D login(String loginId, String password) {
@@ -42,6 +42,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
             if (cnt == 0) {
                 throw new KcLoginFailureException();
             } else {
+                var max = accountLoginManager.getMaxLoginAttemptCount();
                 throw new KcLoginFailureException();
             }
         } catch (LockedException ex) {

@@ -11,5 +11,7 @@ import com.keencho.lib.spring.security.repository.KcAccountRepository;
  * @param <D> Return Type
  */
 public interface KcLoginService<T extends KcAccountBaseModel, R extends KcAccountRepository<T, ID>, ID, D> {
+    Class<T> getAccountEntityClass();
+
     D login(String loginId, String password);
 }

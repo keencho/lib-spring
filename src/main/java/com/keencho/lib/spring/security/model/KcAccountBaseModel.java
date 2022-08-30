@@ -1,20 +1,10 @@
 package com.keencho.lib.spring.security.model;
 
-import org.springframework.security.core.GrantedAuthority;
-
 import javax.persistence.MappedSuperclass;
-import javax.persistence.Transient;
 import java.time.LocalDateTime;
-import java.util.Collection;
 
 @MappedSuperclass
 public abstract class KcAccountBaseModel {
-
-    @Transient
-    public abstract Collection<? extends GrantedAuthority> authorities();
-
-    @Transient
-    public abstract int maxLoginAttemptCount();
 
     protected String loginId;
 

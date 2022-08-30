@@ -2,17 +2,23 @@ package com.keencho.lib.spring.security.manager;
 
 import com.keencho.lib.spring.security.model.KcAccountBaseModel;
 import com.keencho.lib.spring.security.repository.KcAccountRepository;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.util.Assert;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 
-public class KcDefaultAccountLoginManager<T extends KcAccountBaseModel, R extends KcAccountRepository<T, ID>, ID> implements KcAccountLoginManager<T, R, ID> {
+public abstract class KcDefaultAccountLoginManager<T extends KcAccountBaseModel, R extends KcAccountRepository<T, ID>, ID> implements KcAccountLoginManager<T, R, ID> {
 
     private final R repo;
 
     public KcDefaultAccountLoginManager(R r) {
         this.repo = r;
     }
+
+    public abstract Collection<? extends GrantedAuthority> getAuthorities();
+
+    public abstract int getMaxLoginAttemptCount();
 
     @Override
     public T findByLoginId(String loginId) {
@@ -52,7 +58,7 @@ public class KcDefaultAccountLoginManager<T extends KcAccountBaseModel, R extend
         var currentCount = account.getLoginAttemptCount();
         var targetCount = currentCount + 1;
 
-        if (targetCount >= account.maxLoginAttemptCount()) {
+        if (targetCount >= this.getMaxLoginAttemptCount()) {
             account.setAccountNonLocked(false);
         }
 
