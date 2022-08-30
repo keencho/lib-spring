@@ -11,4 +11,12 @@ public class KcLoginFailureException extends KcRuntimeException {
     public KcLoginFailureException() {
         super(DEFAULT_MESSAGE);
     }
+
+    public KcLoginFailureException(int loginAttemptCount, int maxLoginAttemptCount) {
+        super(String.format(DEFAULT_MESSAGE + "(%d / %d)", loginAttemptCount, maxLoginAttemptCount));
+    }
+
+    public KcLoginFailureException(String message) {
+        super(message);
+    }
 }

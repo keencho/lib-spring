@@ -22,6 +22,8 @@ public abstract class KcDefaultLoginManager<T extends KcAccountBaseModel, R exte
 
     public abstract int getMaxLoginAttemptCount();
 
+    public abstract int getMaxLongTermNonUseAllowDay();
+
     public abstract UserDetails loadUserByUsername(String username) throws UsernameNotFoundException;
 
     @Override
@@ -30,23 +32,16 @@ public abstract class KcDefaultLoginManager<T extends KcAccountBaseModel, R exte
     }
 
     @Override
-    public void updateDtPasswordChangedAt(String loginId) {
+    public void updateOnLoginSuccess(String loginId) {
         var account = this.findByLoginId(loginId);
 
         Assert.notNull(account, "account must not be null!");
 
-        account.setDtPasswordChangedAt(LocalDateTime.now());
+        var now = LocalDateTime.now();
 
-        repo.save(account);
-    }
-
-    @Override
-    public void updateDtLastAccessedAt(String loginId) {
-        var account = this.findByLoginId(loginId);
-
-        Assert.notNull(account, "account must not be null!");
-
-        account.setDtLastAccessedAt(LocalDateTime.now());
+        account.setDtLastAccessedAt(now);
+        account.setDtLastLoggedInAt(now);
+        account.setLoginAttemptCount(0);
 
         repo.save(account);
     }
@@ -63,6 +58,8 @@ public abstract class KcDefaultLoginManager<T extends KcAccountBaseModel, R exte
         var targetCount = currentCount + 1;
 
         if (targetCount >= this.getMaxLoginAttemptCount()) {
+            // 잠궈야 한다면 로그인시도는 초기화한다.
+            targetCount = 0;
             account.setAccountNonLocked(false);
         }
 
@@ -71,5 +68,16 @@ public abstract class KcDefaultLoginManager<T extends KcAccountBaseModel, R exte
         repo.save(account);
 
         return targetCount;
+    }
+
+    @Override
+    public void lockAccount(String loginId) {
+        var account = this.findByLoginId(loginId);
+
+        Assert.notNull(account, "account must not be null!");
+
+        account.setAccountNonLocked(false);
+
+        repo.save(account);
     }
 }

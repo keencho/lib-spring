@@ -1,85 +1,47 @@
 package com.keencho.lib.spring.security.model;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 import java.time.LocalDateTime;
 
+@EqualsAndHashCode(callSuper = false)
+@Data
 @MappedSuperclass
 public abstract class KcAccountBaseModel {
 
+    @Column(nullable = false)
     protected String loginId;
 
+    @Column(nullable = false)
     protected String password;
 
+    @Column(nullable = false)
     protected boolean accountNonExpired = true;
 
+    @Column(nullable = false)
     protected boolean accountNonLocked = true;
 
+    @Column(nullable = false)
     protected boolean credentialsNonExpired = true;
 
+    @Column(nullable = false)
     protected boolean enabled = true;
 
+    @Column(nullable = false)
     protected LocalDateTime dtCreatedAt = LocalDateTime.now();
 
+    @Column(nullable = false)
     protected LocalDateTime dtUpdatedAt = LocalDateTime.now();
 
     protected LocalDateTime dtPasswordChangedAt = LocalDateTime.now();
 
+    protected LocalDateTime dtLastLoggedInAt;
+
     protected LocalDateTime dtLastAccessedAt;
 
+    @Column(nullable = false)
     protected int loginAttemptCount = 0;
-
-    public KcAccountBaseModel() {
-    }
-
-    public String getLoginId() {
-        return loginId;
-    }
-
-    public void setLoginId(String loginId) {
-        this.loginId = loginId;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public boolean isAccountNonExpired() {
-        return accountNonExpired;
-    }
-
-    public boolean isAccountNonLocked() {
-        return accountNonLocked;
-    }
-
-    public boolean isCredentialsNonExpired() {
-        return credentialsNonExpired;
-    }
-
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public void setDtPasswordChangedAt(LocalDateTime dtPasswordChangedAt) {
-        this.dtPasswordChangedAt = dtPasswordChangedAt;
-    }
-
-    public void setDtLastAccessedAt(LocalDateTime dtLastAccessedAt) {
-        this.dtLastAccessedAt = dtLastAccessedAt;
-    }
-
-    public int getLoginAttemptCount() {
-        return loginAttemptCount;
-    }
-
-    public void setLoginAttemptCount(int loginAttemptCount) {
-        this.loginAttemptCount = loginAttemptCount;
-    }
-
-    public void setAccountNonLocked(boolean accountNonLocked) {
-        this.accountNonLocked = accountNonLocked;
-    }
 }

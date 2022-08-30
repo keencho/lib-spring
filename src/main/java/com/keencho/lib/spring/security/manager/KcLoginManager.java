@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Collection;
 
 /**
- * 로그인 관련 매니저 ->
+ * 로그인 관련 매니저
  *
  * @param <T> Account Entity
  * @param <R> Repository
@@ -21,16 +21,18 @@ public interface KcLoginManager<T extends KcAccountBaseModel, R extends KcAccoun
 
     int getMaxLoginAttemptCount();
 
+    int getMaxLongTermNonUseAllowDay();
+
     @Transactional(readOnly = true)
     T findByLoginId(String loginId);
 
     @Transactional
-    void updateDtPasswordChangedAt(String loginId);
-
-    @Transactional
-    void updateDtLastAccessedAt(String loginId);
+    void updateOnLoginSuccess(String loginId);
 
     @Transactional
     int updateLoginAttemptAccount(String loginId);
+
+    @Transactional
+    void lockAccount(String loginId);
 
 }
