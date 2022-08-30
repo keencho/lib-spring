@@ -11,16 +11,14 @@ import java.util.Collection;
 public abstract class KcAccountBaseModel {
 
     @Transient
-    public abstract int maxLoginAttemptCnt();
+    public abstract Collection<? extends GrantedAuthority> authorities();
 
     @Transient
-    public abstract Collection<? extends GrantedAuthority> authorities();
+    public abstract int maxLoginAttemptCount();
 
     protected String loginId;
 
     protected String password;
-
-    protected int loginAttemptCnt = 0;
 
     protected boolean accountNonExpired = true;
 
@@ -37,6 +35,8 @@ public abstract class KcAccountBaseModel {
     protected LocalDateTime dtPasswordChangedAt = LocalDateTime.now();
 
     protected LocalDateTime dtLastAccessedAt;
+
+    protected int loginAttemptCount = 0;
 
     public KcAccountBaseModel() {
     }
@@ -79,5 +79,17 @@ public abstract class KcAccountBaseModel {
 
     public void setDtLastAccessedAt(LocalDateTime dtLastAccessedAt) {
         this.dtLastAccessedAt = dtLastAccessedAt;
+    }
+
+    public int getLoginAttemptCount() {
+        return loginAttemptCount;
+    }
+
+    public void setLoginAttemptCount(int loginAttemptCount) {
+        this.loginAttemptCount = loginAttemptCount;
+    }
+
+    public void setAccountNonLocked(boolean accountNonLocked) {
+        this.accountNonLocked = accountNonLocked;
     }
 }

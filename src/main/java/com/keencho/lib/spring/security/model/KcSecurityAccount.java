@@ -7,7 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.Set;
 
-public class KcSecurityAccount<LOGIN_DATA> implements UserDetails, CredentialsContainer {
+public class KcSecurityAccount<T> implements UserDetails, CredentialsContainer {
 
     private final String loginId;
     private String password;
@@ -17,11 +17,11 @@ public class KcSecurityAccount<LOGIN_DATA> implements UserDetails, CredentialsCo
     private final boolean accountNonLocked;
     private final boolean credentialsNonExpired;
     private final boolean enabled;
-    private final LOGIN_DATA data;
+    private final T data;
 
     public KcSecurityAccount(String loginId, String password, Set<GrantedAuthority> authorities,
                              boolean accountNonExpired, boolean accountNonLocked, boolean credentialsNonExpired, boolean enabled,
-                             LOGIN_DATA data) {
+                             T data) {
         this.loginId = loginId;
         this.password = password;
         this.authorities = authorities;
@@ -72,7 +72,7 @@ public class KcSecurityAccount<LOGIN_DATA> implements UserDetails, CredentialsCo
         return this.enabled;
     }
 
-    public LOGIN_DATA getData() {
+    public T getData() {
         return data;
     }
 }

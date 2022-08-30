@@ -1,5 +1,6 @@
 package com.keencho.lib.spring.security.service;
 
+import com.keencho.lib.spring.security.exception.KcLoginFailureException;
 import com.keencho.lib.spring.security.manager.KcAccountLoginManager;
 import com.keencho.lib.spring.security.model.KcAccountBaseModel;
 import com.keencho.lib.spring.security.model.KcSecurityAccount;
@@ -12,41 +13,48 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-public abstract class KcLoginServiceImpl<ACCOUNT extends KcAccountBaseModel, REPO extends KcAccountRepository<ACCOUNT, KEY>, KEY, LOGIN_DATA> implements KcLoginService<ACCOUNT, REPO, KEY, LOGIN_DATA> {
+    public abstract class KcDefaultLoginService<T extends KcAccountBaseModel, R extends KcAccountRepository<T, ID>, ID, D> implements KcLoginService<T, R, ID, D> {
 
-    private final KcAuthenticationProviderManager authenticationProviderManager;
-    private final KcAccountLoginManager<ACCOUNT, REPO, KEY> accountLoginManager;
+        private final KcAuthenticationProviderManager authenticationProviderManager;
+        private final KcAccountLoginManager<T, R, ID> accountLoginManager;
 
-    public KcLoginServiceImpl(KcAuthenticationProviderManager authenticationProviderManager, KcAccountLoginManager<ACCOUNT, REPO, KEY> accountLoginManager) {
+        public KcDefaultLoginService(KcAuthenticationProviderManager authenticationProviderManager, KcAccountLoginManager<T, R, ID> accountLoginManager) {
         this.authenticationProviderManager = authenticationProviderManager;
         this.accountLoginManager = accountLoginManager;
     }
 
-    protected abstract Class<?> getAccountEntityClass();
+    protected abstract Class<T> getAccountEntityClass();
 
     @Override
-    public LOGIN_DATA login(String loginId, String password) {
-        Authentication authentication = null;
+    public D login(String loginId, String password) {
+        Authentication authentication;
         var token = new UsernamePasswordAuthenticationToken(loginId, password);
 
         try {
-            var authenticationProvider = authenticationProviderManager.getAuthenticationProvider(this.getAccountEntityClass());
+            var authenticationProvider = authenticationProviderManager.getAuthenticationProvider(getAccountEntityClass());
             authentication = authenticationProvider.authenticate(token);
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
         } catch (BadCredentialsException ex) {
+            var cnt = accountLoginManager.updateLoginAttemptAccount(loginId);
 
+            // 계정 없음
+            if (cnt == 0) {
+                throw new KcLoginFailureException();
+            } else {
+                throw new KcLoginFailureException();
+            }
         } catch (LockedException ex) {
-
+            throw ex;
         } catch (DisabledException ex) {
-
+            throw ex;
         } catch (Exception ex) {
-
+            throw ex;
         }
 
         accountLoginManager.updateDtLastAccessedAt(token.getPrincipal().toString());
 
-        var securityUser = (KcSecurityAccount<LOGIN_DATA>) authentication.getPrincipal();
+        var securityUser = (KcSecurityAccount<D>) authentication.getPrincipal();
 
         return securityUser.getData();
     }

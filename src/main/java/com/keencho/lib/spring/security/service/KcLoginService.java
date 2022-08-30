@@ -3,6 +3,13 @@ package com.keencho.lib.spring.security.service;
 import com.keencho.lib.spring.security.model.KcAccountBaseModel;
 import com.keencho.lib.spring.security.repository.KcAccountRepository;
 
-public interface KcLoginService<ACCOUNT extends KcAccountBaseModel, REPO extends KcAccountRepository<ACCOUNT, KEY>, KEY, LOGIN_DATA> {
-    LOGIN_DATA login(String loginId, String password);
+/**
+ * 로그인 서비스
+ * @param <T> Account Entity
+ * @param <R> Account Repository
+ * @param <ID> Account Entity Id
+ * @param <D> Return Type
+ */
+public interface KcLoginService<T extends KcAccountBaseModel, R extends KcAccountRepository<T, ID>, ID, D> {
+    D login(String loginId, String password);
 }
