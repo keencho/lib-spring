@@ -9,13 +9,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Collection;
 
 /**
- * 로그인 관련 매니저
+ * 로그인 관련 매니저 ->
  *
  * @param <T> Account Entity
  * @param <R> Repository
  * @param <ID> Account Entity ID Type
  */
-public interface KcAccountLoginManager<T extends KcAccountBaseModel, R extends KcAccountRepository<T, ID>, ID> {
+public interface KcLoginManager<T extends KcAccountBaseModel, R extends KcAccountRepository<T, ID>, ID> extends UserDetailsService {
 
     Collection<? extends GrantedAuthority> getAuthorities();
 

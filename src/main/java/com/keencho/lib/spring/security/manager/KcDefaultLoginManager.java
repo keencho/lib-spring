@@ -3,22 +3,26 @@ package com.keencho.lib.spring.security.manager;
 import com.keencho.lib.spring.security.model.KcAccountBaseModel;
 import com.keencho.lib.spring.security.repository.KcAccountRepository;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.util.Assert;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
 
-public abstract class KcDefaultAccountLoginManager<T extends KcAccountBaseModel, R extends KcAccountRepository<T, ID>, ID> implements KcAccountLoginManager<T, R, ID> {
+public abstract class KcDefaultLoginManager<T extends KcAccountBaseModel, R extends KcAccountRepository<T, ID>, ID> implements KcLoginManager<T, R, ID> {
 
     private final R repo;
 
-    public KcDefaultAccountLoginManager(R r) {
+    public KcDefaultLoginManager(R r) {
         this.repo = r;
     }
 
     public abstract Collection<? extends GrantedAuthority> getAuthorities();
 
     public abstract int getMaxLoginAttemptCount();
+
+    public abstract UserDetails loadUserByUsername(String username) throws UsernameNotFoundException;
 
     @Override
     public T findByLoginId(String loginId) {

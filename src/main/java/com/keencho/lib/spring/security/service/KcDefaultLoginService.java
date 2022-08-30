@@ -1,7 +1,7 @@
 package com.keencho.lib.spring.security.service;
 
 import com.keencho.lib.spring.security.exception.KcLoginFailureException;
-import com.keencho.lib.spring.security.manager.KcAccountLoginManager;
+import com.keencho.lib.spring.security.manager.KcLoginManager;
 import com.keencho.lib.spring.security.model.KcAccountBaseModel;
 import com.keencho.lib.spring.security.model.KcSecurityAccount;
 import com.keencho.lib.spring.security.provider.KcAuthenticationProviderManager;
@@ -16,9 +16,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 public abstract class KcDefaultLoginService<T extends KcAccountBaseModel, R extends KcAccountRepository<T, ID>, ID, D> implements KcLoginService<T, R, ID, D> {
 
     private final KcAuthenticationProviderManager authenticationProviderManager;
-    private final KcAccountLoginManager<T, R, ID> accountLoginManager;
+    private final KcLoginManager<T, R, ID> accountLoginManager;
 
-    public KcDefaultLoginService(KcAuthenticationProviderManager authenticationProviderManager, KcAccountLoginManager<T, R, ID> accountLoginManager) {
+    public KcDefaultLoginService(KcAuthenticationProviderManager authenticationProviderManager, KcLoginManager<T, R, ID> accountLoginManager) {
         this.authenticationProviderManager = authenticationProviderManager;
         this.accountLoginManager = accountLoginManager;
     }
