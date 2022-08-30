@@ -7,8 +7,10 @@ import com.keencho.lib.spring.security.exception.KcAccountLongTermNotUsedExcepti
 import com.keencho.lib.spring.security.exception.KcLoginFailureException;
 import com.keencho.lib.spring.security.manager.KcLoginManager;
 import com.keencho.lib.spring.security.model.KcAccountBaseModel;
+import com.keencho.lib.spring.security.model.KcAuthReturnType;
 import com.keencho.lib.spring.security.model.KcSecurityAccount;
 import com.keencho.lib.spring.security.provider.KcAuthenticationProviderManager;
+import com.keencho.lib.spring.security.provider.KcJwtTokenProvider;
 import com.keencho.lib.spring.security.repository.KcAccountRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,13 +29,16 @@ public abstract class KcDefaultLoginService<T extends KcAccountBaseModel, R exte
 
     private final KcAuthenticationProviderManager authenticationProviderManager;
     private final KcLoginManager<T, R, ID> accountLoginManager;
+    private final KcJwtTokenProvider jwtTokenProvider;
 
-    public KcDefaultLoginService(KcAuthenticationProviderManager authenticationProviderManager, KcLoginManager<T, R, ID> accountLoginManager) {
+    public KcDefaultLoginService(KcAuthenticationProviderManager authenticationProviderManager, KcLoginManager<T, R, ID> accountLoginManager, KcJwtTokenProvider jwtTokenProvider) {
         this.authenticationProviderManager = authenticationProviderManager;
         this.accountLoginManager = accountLoginManager;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     public abstract Class<T> getAccountEntityClass();
+    public abstract KcAuthReturnType getAuthReturnType();
 
     @Override
     public D login(String loginId, String password) {
@@ -58,7 +63,9 @@ public abstract class KcDefaultLoginService<T extends KcAccountBaseModel, R exte
                 throw new LockedException("account locked");
             }
 
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            if (this.getAuthReturnType() == KcAuthReturnType.AUTHENTICATION) {
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
         } catch (BadCredentialsException ex) {
             var cnt = accountLoginManager.updateLoginAttemptAccount(loginId);
 
@@ -90,6 +97,15 @@ public abstract class KcDefaultLoginService<T extends KcAccountBaseModel, R exte
         accountLoginManager.updateOnLoginSuccess(token.getPrincipal().toString());
 
         var securityUser = (KcSecurityAccount<D>) authentication.getPrincipal();
+
+        // 코딩 잘못임. jwt token을 리턴해야 하는데 jwt token provider가 주입되지 않음.\
+        if (this.getAuthReturnType() == KcAuthReturnType.JWT_TOKEN) {
+            if (this.jwtTokenProvider == null) {
+                logger.error("system error: jwt token provider is null");
+                throw new KcSystemException();
+            }
+            return (D) this.jwtTokenProvider.createToken(securityUser);
+        }
 
         return securityUser.getData();
     }
