@@ -2,6 +2,7 @@ package com.keencho.lib.spring.security.manager;
 
 import com.keencho.lib.spring.security.model.KcAccountBaseModel;
 import com.keencho.lib.spring.security.repository.KcAccountRepository;
+import com.keencho.lib.spring.security.resolver.KcAccountResolver;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,9 +14,8 @@ import java.util.Collection;
  *
  * @param <T> Account Entity
  * @param <R> Repository
- * @param <ID> Account Entity ID Type
  */
-public interface KcLoginManager<T extends KcAccountBaseModel, R extends KcAccountRepository<T, ID>, ID> extends UserDetailsService {
+public interface KcLoginManager<T extends KcAccountBaseModel, R extends KcAccountRepository<T, ?>> extends UserDetailsService, KcAccountResolver<T> {
 
     Collection<? extends GrantedAuthority> getAuthorities();
 

@@ -8,7 +8,7 @@ import com.keencho.lib.spring.security.exception.KcLoginFailureException;
 import com.keencho.lib.spring.security.manager.KcLoginManager;
 import com.keencho.lib.spring.security.model.KcAccountBaseModel;
 import com.keencho.lib.spring.security.model.KcSecurityAccount;
-import com.keencho.lib.spring.security.provider.KcAuthenticationProviderManager;
+import com.keencho.lib.spring.security.provider.manager.KcAuthenticationProviderManager;
 import com.keencho.lib.spring.security.provider.KcJwtTokenProvider;
 import com.keencho.lib.spring.security.repository.KcAccountRepository;
 import org.slf4j.Logger;
@@ -24,16 +24,16 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDateTime;
 
-public abstract class KcDefaultLoginService<T extends KcAccountBaseModel, R extends KcAccountRepository<T, ID>, ID, D> implements KcLoginService<T, R, ID> {
+public abstract class KcDefaultLoginService<T extends KcAccountBaseModel, R extends KcAccountRepository<T, ?>> implements KcLoginService<T, R> {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private final KcAuthenticationProviderManager authenticationProviderManager;
-    private final KcLoginManager<T, R, ID> accountLoginManager;
+    private final KcLoginManager<T, R> accountLoginManager;
     private final KcJwtTokenProvider jwtTokenProvider;
     private boolean isUseJwtToken = false;
 
-    public KcDefaultLoginService(KcAuthenticationProviderManager authenticationProviderManager, KcLoginManager<T, R, ID> accountLoginManager, KcJwtTokenProvider jwtTokenProvider) {
+    public KcDefaultLoginService(KcAuthenticationProviderManager authenticationProviderManager, KcLoginManager<T, R> accountLoginManager, KcJwtTokenProvider jwtTokenProvider) {
         this.authenticationProviderManager = authenticationProviderManager;
         this.accountLoginManager = accountLoginManager;
         this.jwtTokenProvider = jwtTokenProvider;

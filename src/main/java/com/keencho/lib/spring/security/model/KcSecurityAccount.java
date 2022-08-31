@@ -5,12 +5,12 @@ import org.springframework.security.core.CredentialsContainer;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
 import java.util.Set;
 
 @Data
 public class KcSecurityAccount implements UserDetails, CredentialsContainer {
 
+    private final Class<?> accountEntityClass;
     private final String loginId;
     private String password;
 
@@ -21,9 +21,10 @@ public class KcSecurityAccount implements UserDetails, CredentialsContainer {
     private final boolean enabled;
     private final Object data;
 
-    public KcSecurityAccount(String loginId, String password, Set<GrantedAuthority> authorities,
+    public KcSecurityAccount(Class<?> accountEntityClass, String loginId, String password, Set<GrantedAuthority> authorities,
                              boolean accountNonExpired, boolean accountNonLocked, boolean credentialsNonExpired, boolean enabled,
                              Object data) {
+        this.accountEntityClass = accountEntityClass;
         this.loginId = loginId;
         this.password = password;
         this.authorities = authorities;

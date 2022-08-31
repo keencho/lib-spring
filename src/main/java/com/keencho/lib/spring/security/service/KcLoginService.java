@@ -7,11 +7,11 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * 로그인 서비스
- * @param <T> Account Entity
- * @param <R> Account Repository
- * @param <ID> Account Entity Id
+ *
+ * @param <T> target entity
+ * @param <R> target entity repository
  */
-public interface KcLoginService<T extends KcAccountBaseModel, R extends KcAccountRepository<T, ID>, ID> {
+public interface KcLoginService<T extends KcAccountBaseModel, R extends KcAccountRepository<T, ?>> {
     Class<T> getAccountEntityClass();
 
     Object login(HttpServletResponse response, String loginId, String password);

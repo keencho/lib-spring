@@ -1,5 +1,6 @@
-package com.keencho.lib.spring.security.provider;
+package com.keencho.lib.spring.security.provider.manager;
 
+import com.keencho.lib.spring.security.provider.KcAuthenticationProvider;
 import org.springframework.util.Assert;
 
 import java.util.Collection;

@@ -1,6 +1,7 @@
 package com.keencho.lib.spring.security.manager;
 
 import com.keencho.lib.spring.security.model.KcAccountBaseModel;
+import com.keencho.lib.spring.security.model.KcSecurityAccount;
 import com.keencho.lib.spring.security.repository.KcAccountRepository;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,7 +11,7 @@ import org.springframework.util.Assert;
 import java.time.LocalDateTime;
 import java.util.Collection;
 
-public abstract class KcDefaultLoginManager<T extends KcAccountBaseModel, R extends KcAccountRepository<T, ID>, ID> implements KcLoginManager<T, R, ID> {
+public abstract class KcDefaultLoginManager<T extends KcAccountBaseModel, R extends KcAccountRepository<T, ?>> implements KcLoginManager<T, R> {
 
     private final R repo;
 
@@ -79,5 +80,10 @@ public abstract class KcDefaultLoginManager<T extends KcAccountBaseModel, R exte
         account.setAccountNonLocked(false);
 
         repo.save(account);
+    }
+
+    @Override
+    public T getAccountBySecurityAccount(KcSecurityAccount securityAccount) {
+        return this.findByLoginId(securityAccount.getLoginId());
     }
 }
