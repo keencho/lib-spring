@@ -51,7 +51,7 @@ public abstract class KcDefaultLoginManager<T extends KcAccountBaseModel, R exte
         var account = this.findByLoginId(loginId);
 
         if (account == null) {
-            return 0;
+            return -1;
         }
 
         var currentCount = account.getLoginAttemptCount();

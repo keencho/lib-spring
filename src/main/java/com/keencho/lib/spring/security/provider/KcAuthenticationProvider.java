@@ -1,5 +1,6 @@
 package com.keencho.lib.spring.security.provider;
 
+import lombok.Getter;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -10,12 +11,16 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-public class KcUserDetailsAuthenticationProvider extends AbstractUserDetailsAuthenticationProvider {
+// 기존 authentcation provider (DaoAuthenticationProvider) 대신 사용할 provider
+// 일단은 별 다른점은 없지만 추가 비즈니스 로직이 들어갈 수도 있다.
+public class KcAuthenticationProvider extends AbstractUserDetailsAuthenticationProvider {
 
     private final PasswordEncoder passwordEncoder;
+
+    @Getter
     private final UserDetailsService userDetailsService;
 
-    public KcUserDetailsAuthenticationProvider(PasswordEncoder passwordEncoder, UserDetailsService userDetailsService) {
+    public KcAuthenticationProvider(PasswordEncoder passwordEncoder, UserDetailsService userDetailsService) {
         this.passwordEncoder = passwordEncoder;
         this.userDetailsService = userDetailsService;
     }
@@ -38,7 +43,7 @@ public class KcUserDetailsAuthenticationProvider extends AbstractUserDetailsAuth
         UserDetails loadedUser;
 
         try {
-            loadedUser = this.userDetailsService.loadUserByUsername(authentication.getPrincipal().toString());
+            loadedUser = this.userDetailsService.loadUserByUsername(username);
         } catch (UsernameNotFoundException notFoundException) {
             throw notFoundException;
         } catch (Exception ex) {

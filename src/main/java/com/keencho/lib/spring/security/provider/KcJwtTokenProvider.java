@@ -4,12 +4,20 @@ import com.keencho.lib.spring.security.model.KcSecurityAccount;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpServletRequest;
+
 public interface KcJwtTokenProvider {
 
-    int expireDays();
+    long getExpireDays();
 
     @Transactional(readOnly = true)
     Authentication getAuthentication(String token);
 
-    String createToken(KcSecurityAccount<?> securityAccount);
+    String resolveToken(HttpServletRequest request);
+
+    String createToken(KcSecurityAccount securityAccount);
+
+    boolean isValidate(String jwtToken);
+
+    String getCookieName();
 }

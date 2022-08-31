@@ -1,8 +1,6 @@
 package com.keencho.lib.spring.security.provider;
 
-import org.springframework.security.authentication.AuthenticationProvider;
-
-import java.lang.reflect.Type;
+import java.util.Collection;
 
 /**
  * 인증 프로바이더 매니저
@@ -10,6 +8,8 @@ import java.lang.reflect.Type;
  */
 public interface KcAuthenticationProviderManager {
 
-    AuthenticationProvider getAuthenticationProvider(Class<?> accountEntityClass);
+    Collection<KcAuthenticationProvider> getProviders();
+
+    KcAuthenticationProvider getAuthenticationProvider(Class<?> accountEntityClass);
 
 }

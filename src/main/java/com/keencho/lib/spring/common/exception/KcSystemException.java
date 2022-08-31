@@ -8,4 +8,8 @@ public class KcSystemException extends KcRuntimeException {
     public KcSystemException() {
         super("시스템 에러가 발생하였습니다.");
     }
+
+    public KcSystemException(String message) {
+        super(message);
+    }
 }

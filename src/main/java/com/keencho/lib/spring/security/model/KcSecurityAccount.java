@@ -9,7 +9,7 @@ import java.util.Collection;
 import java.util.Set;
 
 @Data
-public class KcSecurityAccount<T> implements UserDetails, CredentialsContainer {
+public class KcSecurityAccount implements UserDetails, CredentialsContainer {
 
     private final String loginId;
     private String password;
@@ -19,11 +19,11 @@ public class KcSecurityAccount<T> implements UserDetails, CredentialsContainer {
     private final boolean accountNonLocked;
     private final boolean credentialsNonExpired;
     private final boolean enabled;
-    private final T data;
+    private final Object data;
 
     public KcSecurityAccount(String loginId, String password, Set<GrantedAuthority> authorities,
                              boolean accountNonExpired, boolean accountNonLocked, boolean credentialsNonExpired, boolean enabled,
-                             T data) {
+                             Object data) {
         this.loginId = loginId;
         this.password = password;
         this.authorities = authorities;
