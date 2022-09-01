@@ -2,10 +2,11 @@ plugins {
     id 'org.springframework.boot' version '2.7.3'
     id 'io.spring.dependency-management' version '1.0.13.RELEASE'
     id 'java'
+    id 'maven-publish'
 }
 
-group = 'com.keencho.lib.spring.security'
-version = '0.0.1'
+group = 'com.keencho.lib.spring'
+version = '1.0.0'
 sourceCompatibility = '17'
 
 repositories {
@@ -23,4 +24,19 @@ dependencies {
 
 bootJar { enabled = false }
 
-jar { enabled = true }
+jar {
+    enabled = true
+    archiveClassifier = ''
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId = 'com.github.keencho'
+            artifactId = 'lib-spring'
+            version = '1.0.0'
+
+            from components.java
+        }
+    }
+}
