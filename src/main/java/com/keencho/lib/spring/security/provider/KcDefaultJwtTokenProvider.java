@@ -3,28 +3,36 @@ package com.keencho.lib.spring.security.provider;
 import com.keencho.lib.spring.security.model.KcSecurityAccount;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import io.jsonwebtoken.Jwts;
 import org.springframework.util.StringUtils;
 
+import javax.crypto.SecretKey;
 import javax.servlet.http.HttpServletRequest;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Base64;
 import java.util.Date;
 import java.util.UUID;
 
 public abstract class KcDefaultJwtTokenProvider implements KcJwtTokenProvider {
 
-    private final String secretKey;
     private final UserDetailsService userDetailsService;
     private final String claimsKeyName = "loginId";
+    private String refreshCookieNamePrefix = "REFRESH_";
+    private final SecretKey secretKey;
 
     public KcDefaultJwtTokenProvider(String secretKey, UserDetailsService userDetailsService) {
-        this.secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
+        this.secretKey = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
         this.userDetailsService = userDetailsService;
+    }
+
+    public KcDefaultJwtTokenProvider(String secretKey, UserDetailsService userDetailsService, String refreshCookieNamePrefix) {
+        this(secretKey, userDetailsService);
+        this.refreshCookieNamePrefix = refreshCookieNamePrefix;
     }
 
     public abstract long getExpireDays();
@@ -72,7 +80,7 @@ public abstract class KcDefaultJwtTokenProvider implements KcJwtTokenProvider {
         return Jwts.builder().setClaims(claims)
                 .setIssuedAt(date)
                 .setExpiration(Date.from(limit.atZone(ZoneId.systemDefault()).toInstant()))
-                .signWith(SignatureAlgorithm.HS256, this.secretKey)
+                .signWith(this.secretKey, SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -95,8 +103,9 @@ public abstract class KcDefaultJwtTokenProvider implements KcJwtTokenProvider {
 
     private Claims getClaims(String jwtToken) {
         return Jwts
-                .parser()
-                .setSigningKey(secretKey)
+                .parserBuilder()
+                .setSigningKey(this.secretKey)
+                .build()
                 .parseClaimsJws(jwtToken)
                 .getBody();
     }

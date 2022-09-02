@@ -33,11 +33,19 @@ public class KcWebAccountResolver implements HandlerMethodArgumentResolver {
 
             Object account = null;
             if (securityAccount != null) {
-                if (securityAccount.getAccountEntityClass() == parameter.getParameterType()) {
-                    var resolver = this.kcAccountResolverManager.getKcAccountResolver(securityAccount.getAccountEntityClass());
+                switch (kcsAccount.accountType()) {
+                    case ACCOUNT_ENTITY -> {
+                        if (securityAccount.getAccountEntityClass() == parameter.getParameterType()) {
+                            var resolver = this.kcAccountResolverManager.getKcAccountResolver(securityAccount.getAccountEntityClass());
 
-                    if (resolver != null) {
-                        account = resolver.getAccountBySecurityAccount(securityAccount);
+                            if (resolver != null) {
+                                account = resolver.getAccountBySecurityAccount(securityAccount);
+                            }
+                        }
+                    }
+                    case SECURITY_ACCOUNT -> account = securityAccount;
+                    case CUSTOM_OBJECT -> {
+
                     }
                 }
             }

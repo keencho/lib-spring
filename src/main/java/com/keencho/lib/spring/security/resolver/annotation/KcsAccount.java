@@ -8,5 +8,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface KcsAccount {
+    KcsAccountType accountType() default KcsAccountType.ACCOUNT_ENTITY;
     boolean required() default false;
 }
