@@ -15,15 +15,9 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 public class KcWebAccountResolver implements HandlerMethodArgumentResolver {
 
     private final KcAccountResolverManager kcAccountResolverManager;
-    private KcWebSecurityAccountCustomObjectParser<?> accountCustomObjectParser = null;
 
     public KcWebAccountResolver(KcAccountResolverManager kcAccountResolverManager) {
         this.kcAccountResolverManager = kcAccountResolverManager;
-    }
-
-    public KcWebAccountResolver(KcAccountResolverManager kcAccountResolverManager, KcWebSecurityAccountCustomObjectParser<?> customObjectParser) {
-        this(kcAccountResolverManager);
-        this.accountCustomObjectParser = customObjectParser;
     }
 
     @Override
@@ -51,13 +45,6 @@ public class KcWebAccountResolver implements HandlerMethodArgumentResolver {
                         }
                     }
                     case SECURITY_ACCOUNT -> account = securityAccount;
-                    case SECURITY_ACCOUNT_CUSTOM_OBJECT -> {
-                        if (this.accountCustomObjectParser == null) {
-                            throw new KcSystemException("KcAccount custom object parser must not be null!");
-                        }
-
-                        account = this.accountCustomObjectParser.parse(securityAccount);
-                    }
                 }
             }
 
