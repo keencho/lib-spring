@@ -1,21 +1,19 @@
 package com.keencho.lib.spring.excel;
 
+import com.keencho.lib.spring.common.utils.KcReflectionUtils;
 import com.keencho.lib.spring.excel.annotation.KcExcelColumn;
 import com.keencho.lib.spring.excel.annotation.KcExcelDocument;
-import com.keencho.lib.spring.excel.exception.KcExcelException;
 import com.keencho.lib.spring.excel.exception.KcExcelNoDataException;
 import com.keencho.lib.spring.excel.exception.KcExcelNotEffectiveClassException;
 import com.keencho.lib.spring.excel.resolver.KcExcelMaskingDefaultResolver;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletResponse;
-import java.beans.IntrospectionException;
-import java.beans.PropertyDescriptor;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -38,6 +36,38 @@ public class KcExcelDownloader {
     public KcExcelDownloader(LinkedHashMap<String, List<?>>  data, boolean showSequence) {
         this(data);
         this.showSequence = showSequence;
+    }
+
+    private enum CellPosition { HEADER, BODY }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private void configureCellStyle(Cell cell, CellPosition cellPosition, KcExcelColumn kcExcelColumn) {
+
+        var configurerClass = cellPosition == CellPosition.HEADER ? kcExcelColumn.headerStyleConfigurer() : kcExcelColumn.bodyStyleConfigurer();
+        var newInstance = KcReflectionUtils.initNewInstance(configurerClass);
+
+        var style = this.workbook.createCellStyle();
+        var font = this.workbook.createFont();
+        style.setFillForegroundColor(newInstance.fillForegroundColor());
+        style.setFillPattern(newInstance.fillPatternType());
+        style.setAlignment(newInstance.horizontalAlignment());
+        style.setVerticalAlignment(newInstance.verticalAlignment());
+        style.setFont(newInstance.font(font));
+
+        var borderStyle = newInstance.borderStyle();
+        style.setBorderTop(borderStyle);
+        style.setBorderRight(borderStyle);
+        style.setBorderBottom(borderStyle);
+        style.setBorderLeft(borderStyle);
+
+        var borderColor = newInstance.borderColor();
+        style.setTopBorderColor(borderColor);
+        style.setRightBorderColor(borderColor);
+        style.setBottomBorderColor(borderColor);
+        style.setLeftBorderColor(borderColor);
+
+        cell.setCellStyle(style);
     }
 
     private void create() throws IOException {
@@ -67,6 +97,7 @@ public class KcExcelDownloader {
             }
 
             var clazz = value.get(0).getClass();
+            var excelDocumentAnnotation = clazz.getAnnotation(KcExcelDocument.class);
 
             var fields = Arrays.stream(clazz.getDeclaredFields())
                     .filter(f -> f.getAnnotation(KcExcelColumn.class) != null).toList();
@@ -74,23 +105,33 @@ public class KcExcelDownloader {
             workbook.setSheetName(sheetNo++, StringUtils.hasText(key) ? key : "Sheet" + sheetNo);
 
             var rowCount = 0;
-            var columnCount = 0;
+            var columnIdx = 0;
             var row = sheet.createRow(rowCount++);
-
 
             /////////////////////////////////////////////////
             //////////////////// 헤더 정의
             /////////////////////////////////////////////////
-
             if (this.showSequence) {
-                var cell = row.createCell(columnCount ++);
+                var cell = row.createCell(columnIdx ++);
                 cell.setCellValue("번호");
+                sheet.setColumnWidth(0, 50 * 32);
             }
 
-            for (var headerField : fields) {
+            for (var h = 0; h < fields.size(); h++) {
+                var headerField = fields.get(h);
                 var headerColumn = headerField.getAnnotation(KcExcelColumn.class);
-                var headerCell = row.createCell(columnCount++);
+                var headerCell = row.createCell(columnIdx);
+
                 headerCell.setCellValue(headerColumn.headerName());
+                this.configureCellStyle(headerCell, CellPosition.HEADER, headerColumn);
+
+                sheet.setColumnWidth(columnIdx, headerColumn.width() * 32);
+
+                if (h == 0) {
+                    row.setHeight((short) (excelDocumentAnnotation.headerHeight() * 20));
+                }
+
+                columnIdx++;
             }
 
             /////////////////////////////////////////////////
@@ -101,40 +142,31 @@ public class KcExcelDownloader {
                 row = sheet.createRow(rowCount ++);
                 var bodyColumnIdx = 0;
 
+                if (i == 0) {
+                    row.setHeight((short) (excelDocumentAnnotation.bodyHeight() * 20));
+                }
+
                 if (this.showSequence) {
                     var cell = row.createCell(bodyColumnIdx ++);
                     cell.setCellValue(i + 1);
+                    sheet.setColumnWidth(0, 50 * 32);
                 }
 
                 for (var field : fields) {
                     var column = field.getAnnotation(KcExcelColumn.class);
-                    var cell = row.createCell(bodyColumnIdx++);
+                    var cell = row.createCell(bodyColumnIdx ++);
 
-                    Object fieldValue;
-                    try {
-                        fieldValue = new PropertyDescriptor(field.getName(), clazz).getReadMethod().invoke(data);
-                    } catch (IntrospectionException  | InvocationTargetException | IllegalAccessException ex) {
-                        // getter 없음, 리플렉션 실패
-                        if (logger.isDebugEnabled()) {
-                            logger.info("error occurred white invoke getter method via reflection: " + ex.getMessage());
-                        }
-                        throw new KcExcelException();
-                    }
-
+                    var fieldValue = KcReflectionUtils.invokeGetter(clazz, field.getName(), data);
                     var resolverClass = column.resolver();
 
                     if (resolverClass == KcExcelMaskingDefaultResolver.class) {
                         cell.setCellValue((String) fieldValue);
                     } else {
-                        try {
-                            cell.setCellValue((String) resolverClass.getMethod("apply", Object.class).invoke(resolverClass.getDeclaredConstructor().newInstance(), fieldValue));
-                        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException | InstantiationException ex) {
-                            if (logger.isDebugEnabled()) {
-                                logger.info("error occurred while masking data with custom masking resolver, default value will be set: " + ex.getMessage());
-                            }
-                            cell.setCellValue((String) fieldValue);
-                        }
+                        var instance = KcReflectionUtils.initNewInstance(resolverClass);
+                        cell.setCellValue(instance.apply(fieldValue));
                     }
+
+                    this.configureCellStyle(cell, CellPosition.BODY, column);
                 }
 
                 sheet.flushRows(value.size());

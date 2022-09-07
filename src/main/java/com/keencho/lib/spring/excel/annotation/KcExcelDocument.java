@@ -8,4 +8,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface KcExcelDocument {
+    short headerHeight() default 25;
+    short bodyHeight() default 20;
 }
