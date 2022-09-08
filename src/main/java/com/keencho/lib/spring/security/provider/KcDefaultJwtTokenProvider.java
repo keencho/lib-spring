@@ -22,17 +22,11 @@ public abstract class KcDefaultJwtTokenProvider implements KcJwtTokenProvider {
 
     private final UserDetailsService userDetailsService;
     private final String claimsKeyName = "loginId";
-    private String refreshCookieNamePrefix = "REFRESH_";
     private final SecretKey secretKey;
 
     public KcDefaultJwtTokenProvider(String secretKey, UserDetailsService userDetailsService) {
         this.secretKey = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
         this.userDetailsService = userDetailsService;
-    }
-
-    public KcDefaultJwtTokenProvider(String secretKey, UserDetailsService userDetailsService, String refreshCookieNamePrefix) {
-        this(secretKey, userDetailsService);
-        this.refreshCookieNamePrefix = refreshCookieNamePrefix;
     }
 
     public abstract long getExpireDays();
