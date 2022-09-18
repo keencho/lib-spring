@@ -1,6 +1,5 @@
 package com.keencho.lib.spring.security.provider;
 
-import lombok.Getter;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,8 +16,11 @@ public class KcAuthenticationProvider extends AbstractUserDetailsAuthenticationP
 
     private final PasswordEncoder passwordEncoder;
 
-    @Getter
     private final UserDetailsService userDetailsService;
+
+    public UserDetailsService getUserDetailsService() {
+        return userDetailsService;
+    }
 
     public KcAuthenticationProvider(PasswordEncoder passwordEncoder, UserDetailsService userDetailsService) {
         this.passwordEncoder = passwordEncoder;

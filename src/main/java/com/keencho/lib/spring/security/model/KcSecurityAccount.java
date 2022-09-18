@@ -1,13 +1,11 @@
 package com.keencho.lib.spring.security.model;
 
-import lombok.Data;
 import org.springframework.security.core.CredentialsContainer;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Set;
 
-@Data
 public class KcSecurityAccount implements UserDetails, CredentialsContainer {
 
     private final Class<?> accountEntityClass;
@@ -40,8 +38,54 @@ public class KcSecurityAccount implements UserDetails, CredentialsContainer {
         this.password = null;
     }
 
+    public Class<?> getAccountEntityClass() {
+        return accountEntityClass;
+    }
+
+    public String getLoginId() {
+        return loginId;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
     @Override
     public String getUsername() {
         return null;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    @Override
+    public Set<GrantedAuthority> getAuthorities() {
+        return authorities;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return accountNonExpired;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return accountNonLocked;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return credentialsNonExpired;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public Object getData() {
+        return data;
     }
 }
