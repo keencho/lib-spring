@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Documented
-@Target(ElementType.CONSTRUCTOR)
+@Target(ElementType.TYPE)
 @Retention(RUNTIME)
 public @interface KcQueryProjection {
 }
