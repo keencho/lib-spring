@@ -343,7 +343,7 @@ public class KcGenericExporter {
                             parameterType = parameterType.as(TypeCategory.valueOf(queryType.value().name()));
                         }
                     }
-                    parameters.add(new Parameter("param" + i, parameterType));
+                    parameters.add(new Parameter(constructor.getParameters()[i].getName(), parameterType));
                 }
                 type.addConstructor(new com.querydsl.codegen.utils.model.Constructor(parameters));
             }
