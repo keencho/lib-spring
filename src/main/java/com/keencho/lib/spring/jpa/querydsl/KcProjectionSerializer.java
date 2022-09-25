@@ -193,10 +193,32 @@ public class KcProjectionSerializer implements ProjectionSerializer {
             newWriter.end();
         }
 
+        ///////////////// KcQueryProjection Custom
+
+        // init field, setter
+        var matchConstructor = model
+                .getConstructors()
+                .stream()
+                .filter(c -> c.getParameters().size() == model.getProperties().size())
+                .findFirst()
+                .orElse(null);
+
+        if (matchConstructor != null) {
+            for (var property : matchConstructor.getParameters()) {
+                var type = property.getType();
+                var name = property.getName();
+
+                newWriter.privateExpressionField(type, name);
+                newWriter.setterMethod(type, name);
+            }
+        }
+
         // init static class builder, setter
         if (model.getJavaClass().isAnnotationPresent(KcQueryProjection.class)) {
             builder(model, newWriter);
         }
+
+        ///////////////////////////////////////////////////
 
         // outro
         outro(model, newWriter);
