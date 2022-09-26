@@ -5,20 +5,18 @@ import com.querydsl.codegen.*;
 import com.querydsl.codegen.utils.CodeWriter;
 import com.querydsl.codegen.utils.JavaWriter;
 import com.querydsl.codegen.utils.ScalaWriter;
-import com.querydsl.codegen.utils.model.*;
+import com.querydsl.codegen.utils.model.Parameter;
+import com.querydsl.codegen.utils.model.Type;
+import com.querydsl.codegen.utils.model.TypeCategory;
 import com.querydsl.codegen.utils.support.ClassUtils;
 import com.querydsl.core.QueryException;
 import com.querydsl.core.annotations.*;
-import com.querydsl.core.types.ConstructorExpression;
-import com.querydsl.core.types.Expression;
-import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.core.util.Annotations;
 import com.querydsl.core.util.BeanUtils;
 import com.querydsl.core.util.ReflectionUtils;
-import org.springframework.lang.NonNull;
+import com.querydsl.core.util.StringUtils;
 import org.springframework.lang.Nullable;
 
-import javax.annotation.processing.Generated;
 import java.io.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
@@ -54,6 +52,8 @@ public class KcGenericExporter {
     private final Map<Class<?>, EntityType> embeddableTypes = new HashMap<>();
 
     private final Map<Class<?>, EntityType> projectionTypes = new HashMap<>();
+
+    private final Map<Class<?>, EntityType> kcProjectionTypes = new HashMap<>();
 
     private final KcCodegenModule codegenModule = new KcCodegenModule();
 
@@ -197,8 +197,13 @@ public class KcGenericExporter {
             createEntityType(cl, projectionTypes);
         }
 
+        // process kcProjections
+        for (Class<?> cl : kcProjectionTypes.keySet()) {
+            createEntityType(cl, kcProjectionTypes);
+        }
+
         // add constructors and properties
-        for (Map<Class<?>, EntityType> entries : Arrays.asList(superTypes, embeddableTypes, entityTypes, projectionTypes)) {
+        for (Map<Class<?>, EntityType> entries : Arrays.asList(superTypes, embeddableTypes, entityTypes, projectionTypes, kcProjectionTypes)) {
             for (Map.Entry<Class<?>, EntityType> entry : new HashSet<>(entries.entrySet())) {
                 addConstructors(entry.getKey(), entry.getValue());
                 addProperties(entry.getKey(), entry.getValue());
@@ -221,7 +226,7 @@ public class KcGenericExporter {
         typeFactory.extendTypes();
 
         try {
-            Serializer supertypeSerializer, entitySerializer, embeddableSerializer, projectionSerializer;
+            Serializer supertypeSerializer, entitySerializer, embeddableSerializer, projectionSerializer, kcProjectionSerializer;
 
             if (serializerClass != null) {
                 Serializer serializer = codegenModule.get(serializerClass);
@@ -229,11 +234,13 @@ public class KcGenericExporter {
                 entitySerializer = serializer;
                 embeddableSerializer = serializer;
                 projectionSerializer = serializer;
+                kcProjectionSerializer = serializer;
             } else {
                 supertypeSerializer = codegenModule.get(SupertypeSerializer.class);
                 entitySerializer = codegenModule.get(EntitySerializer.class);
                 embeddableSerializer = codegenModule.get(EmbeddableSerializer.class);
                 projectionSerializer = codegenModule.get(ProjectionSerializer.class);
+                kcProjectionSerializer = codegenModule.get(KcProjectionSerializer.class);
             }
 
             // serialize super types
@@ -247,6 +254,9 @@ public class KcGenericExporter {
 
             // serialize projection types
             serialize(projectionSerializer, projectionTypes);
+
+            // serialize kcProjection types
+            serialize(kcProjectionSerializer, kcProjectionTypes, "Kc");
 
         } catch (IOException e) {
             throw new QueryException(e);
@@ -290,48 +300,48 @@ public class KcGenericExporter {
     private EntityType createEntityType(Class<?> cl, Map<Class<?>, EntityType> types) {
         if (types.get(cl) != null) {
             return types.get(cl);
-        } else {
-            EntityType type = allTypes.get(ClassUtils.getFullName(cl));
-            if (type == null) {
-                type = typeFactory.getEntityType(cl);
-            }
-            types.put(cl, type);
-            String fullName = ClassUtils.getFullName(cl);
-            if (!allTypes.containsKey(fullName)) {
-                allTypes.put(fullName, type);
-            }
-
-            typeMappings.register(type, queryTypeFactory.create(type));
-
-            if (strictMode && cl.getSuperclass() != null) {
-                @SuppressWarnings("unchecked")
-                Class<? extends Annotation>[] annotations =
-                        (Class<? extends Annotation>[]) new Class<?>[] {entityAnnotation, supertypeAnnotation, embeddableAnnotation};
-                if (!containsAny(cl.getSuperclass(), annotations)) {
-                    // skip supertype handling
-                    return type;
-                }
-            }
-
-            if (cl.getSuperclass() != null && !stopClasses.contains(cl.getSuperclass())
-                    && !cl.getSuperclass().isAnnotationPresent(QueryExclude.class)) {
-                type.addSupertype(new Supertype(typeFactory.get(cl.getSuperclass(), cl.getGenericSuperclass())));
-            }
-            if (cl.isInterface()) {
-                for (Class<?> iface : cl.getInterfaces()) {
-                    if (!stopClasses.contains(iface) && !iface.isAnnotationPresent(QueryExclude.class)) {
-                        type.addSupertype(new Supertype(typeFactory.get(iface)));
-                    }
-                }
-            }
-
-            return type;
         }
+
+        EntityType type = allTypes.get(ClassUtils.getFullName(cl));
+        if (type == null) {
+            type = typeFactory.getEntityType(cl);
+        }
+        types.put(cl, type);
+        String fullName = ClassUtils.getFullName(cl);
+        if (!allTypes.containsKey(fullName)) {
+            allTypes.put(fullName, type);
+        }
+
+        typeMappings.register(type, queryTypeFactory.create(type));
+
+        if (strictMode && cl.getSuperclass() != null) {
+            @SuppressWarnings("unchecked")
+            Class<? extends Annotation>[] annotations =
+                    (Class<? extends Annotation>[]) new Class<?>[] {entityAnnotation, supertypeAnnotation, embeddableAnnotation};
+            if (!containsAny(cl.getSuperclass(), annotations)) {
+                // skip supertype handling
+                return type;
+            }
+        }
+
+        if (cl.getSuperclass() != null && !stopClasses.contains(cl.getSuperclass())
+                && !cl.getSuperclass().isAnnotationPresent(QueryExclude.class)) {
+            type.addSupertype(new Supertype(typeFactory.get(cl.getSuperclass(), cl.getGenericSuperclass())));
+        }
+        if (cl.isInterface()) {
+            for (Class<?> iface : cl.getInterfaces()) {
+                if (!stopClasses.contains(iface) && !iface.isAnnotationPresent(QueryExclude.class)) {
+                    type.addSupertype(new Supertype(typeFactory.get(iface)));
+                }
+            }
+        }
+
+        return type;
     }
 
     private void addConstructors(Class<?> cl, EntityType type) {
         for (java.lang.reflect.Constructor<?> constructor : cl.getConstructors()) {
-            if (constructor.isAnnotationPresent(QueryProjection.class) || cl.isAnnotationPresent(KcQueryProjection.class)) {
+            if (constructor.isAnnotationPresent(QueryProjection.class)) {
                 List<Parameter> parameters = new ArrayList<>();
                 for (int i = 0; i < constructor.getParameterTypes().length; i++) {
                     Type parameterType = typeFactory.get(
@@ -490,8 +500,6 @@ public class KcGenericExporter {
             embeddableTypes.put(cl, null);
         } else if (cl.isAnnotationPresent(supertypeAnnotation)) {
             superTypes.put(cl, null);
-        } else if (cl.isAnnotationPresent(KcQueryProjection.class)) {
-            projectionTypes.put(cl, null);
         } else {
             for (java.lang.reflect.Constructor<?> constructor : cl.getConstructors()) {
                 if (constructor.isAnnotationPresent(QueryProjection.class)) {
@@ -500,13 +508,22 @@ public class KcGenericExporter {
                 }
             }
         }
+
+        if (cl.isAnnotationPresent(KcQueryProjection.class)) {
+            kcProjectionTypes.put(cl, null);
+        }
     }
 
     private void serialize(Serializer serializer, Map<Class<?>, EntityType> types) throws IOException {
+        this.serialize(serializer, types, "");
+    }
+
+    private void serialize(Serializer serializer, Map<Class<?>, EntityType> types, String customPrefix) throws IOException {
         for (Map.Entry<Class<?>, EntityType> entityType : types.entrySet()) {
             Type type = typeMappings.getPathType(entityType.getValue(), entityType.getValue(), true);
             String packageName = type.getPackageName();
-            String className = packageName.length() > 0 ? (packageName + "." + type.getSimpleName()) : type.getSimpleName();
+            String simpleName = !StringUtils.isNullOrEmpty(customPrefix) ? customPrefix + type.getSimpleName() : type.getSimpleName();
+            String className = packageName.length() > 0 ? (packageName + "." + simpleName) : simpleName;
             SerializerConfig config = serializerConfig;
             if (entityType.getKey().isAnnotationPresent(Config.class)) {
                 config = SimpleSerializerConfig.getConfig(entityType.getKey().getAnnotation(Config.class));
@@ -536,7 +553,6 @@ public class KcGenericExporter {
             throw new RuntimeException(e.getMessage(), e);
         }
     }
-
 
     /**
      * Return the set of generated files
