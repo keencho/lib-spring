@@ -1,8 +1,11 @@
 package com.keencho.lib.spring.jpa.querydsl;
 
-import com.querydsl.codegen.*;
+import com.querydsl.codegen.CodegenModule;
+import com.querydsl.codegen.EntityType;
+import com.querydsl.codegen.SerializerConfig;
+import com.querydsl.codegen.TypeMappings;
 import com.querydsl.codegen.utils.CodeWriter;
-import com.querydsl.codegen.utils.model.*;
+import com.querydsl.codegen.utils.model.Type;
 import com.querydsl.core.types.dsl.NumberExpression;
 
 import javax.inject.Inject;
@@ -18,10 +21,6 @@ public class KcDefaultProjectionSerializer implements KcProjectionSerializer {
     private static final String KC_PREFIX = "Kc";
     private String indent = "";
 
-    public KcDefaultProjectionSerializer(TypeMappings typeMappings) {
-        this(typeMappings, GeneratedAnnotationResolver.resolveDefault());
-    }
-
     @Inject
     public KcDefaultProjectionSerializer(
             TypeMappings typeMappings,
@@ -35,7 +34,6 @@ public class KcDefaultProjectionSerializer implements KcProjectionSerializer {
                           CodeWriter cw) throws IOException {
 
         var writer = new KcJavaWriter(cw);
-        String simpleName = KcJavaWriter.KC_PREFIX + model.getSimpleName();
         Type queryType = typeMappings.getPathType(model, model, false);
 
         // package
@@ -50,7 +48,7 @@ public class KcDefaultProjectionSerializer implements KcProjectionSerializer {
 
         // javadoc
         writer.line("/**");
-        writer.line(" * " + queryType + " is a KcQuerydsl Projection type for " + simpleName);
+        writer.line(" * " + queryType + " is a KcQuerydsl Projection type for " + model.getSimpleName());
         writer.line(" */");
 
         // generated annotation

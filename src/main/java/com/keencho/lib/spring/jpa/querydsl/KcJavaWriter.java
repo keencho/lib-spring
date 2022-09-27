@@ -1,22 +1,17 @@
 package com.keencho.lib.spring.jpa.querydsl;
 
-import com.querydsl.codegen.utils.*;
+import com.querydsl.codegen.utils.StringUtils;
+import com.querydsl.codegen.utils.Symbols;
 import com.querydsl.codegen.utils.model.ClassType;
 import com.querydsl.codegen.utils.model.Parameter;
 import com.querydsl.codegen.utils.model.Type;
 import com.querydsl.core.types.Expression;
-import org.apache.poi.ss.formula.functions.T;
 
 import java.io.IOException;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.*;
-import java.util.function.Function;
+import java.util.HashSet;
+import java.util.Set;
 
 public class KcJavaWriter {
-
-    public static final String KC_PREFIX = "Kc";
 
     private static final String PRIVATE = "private ";
 
