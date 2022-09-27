@@ -1,6 +1,4 @@
 plugins {
-    id 'org.springframework.boot' version '2.7.3'
-    id 'io.spring.dependency-management' version '1.0.13.RELEASE'
     id 'maven-publish'
     id 'java'
 }
@@ -12,9 +10,9 @@ repositories {
 dependencies {
 
     // spring
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-web:2.7.3'
+    implementation 'org.springframework.boot:spring-boot-starter-security:2.7.3'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa:2.7.3'
 
     // query-dsl
     implementation 'com.querydsl:querydsl-jpa:5.0.0'
@@ -30,8 +28,6 @@ dependencies {
     implementation 'org.apache.poi:poi-ooxml:5.2.2'
 }
 
-bootJar { enabled = false }
-
 jar {
     enabled = true
     archiveClassifier = ''
@@ -42,7 +38,7 @@ publishing {
         mavenJava(MavenPublication) {
             groupId = 'com.github.keencho'
             artifactId = 'lib-spring'
-            version = '1.0.3'
+            version = '1.0.4'
 
             from components.java
         }
