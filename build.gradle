@@ -31,6 +31,10 @@ dependencies {
 jar {
     enabled = true
     archiveClassifier = ''
+
+    into("META-INF/maven/$project.group/$project.name") {
+        from("pom.xml")
+    }
 }
 
 publishing {
@@ -38,9 +42,16 @@ publishing {
         mavenJava(MavenPublication) {
             groupId = 'com.github.keencho'
             artifactId = 'lib-spring'
-            version = '1.0.4'
+            version = '1.0.5'
 
             from components.java
         }
     }
 }
+
+def generateMavenPom = tasks.register("generateMavenPom", GenerateMavenPom) {
+    destination = file("pom.xml")
+    pom = publishing.publications.mavenJava.pom
+}
+
+tasks.compileJava.dependsOn generateMavenPom
