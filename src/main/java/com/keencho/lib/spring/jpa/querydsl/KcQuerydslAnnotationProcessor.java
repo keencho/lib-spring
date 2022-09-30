@@ -29,7 +29,6 @@ public class KcQuerydslAnnotationProcessor extends JPAAnnotationProcessor {
     private final Map<String, EntityType> kcProjectionTypes = new HashMap<>();
     private final Map<String, Set<TypeElement>> typeElements = new HashMap<>();
 
-
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         var result = super.process(annotations, roundEnv);
@@ -74,9 +73,7 @@ public class KcQuerydslAnnotationProcessor extends JPAAnnotationProcessor {
                 try (Writer w = conf.getFiler().createFile(processingEnv, fullPackageClassName, this.typeElements.get(val.getFullName()))) {
                     var writer = new KcJavaWriter(w);
                     KcProjectionSerializer.serialize(val, writer);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                } catch (IOException ignored) { }
             }
         }
     }

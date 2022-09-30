@@ -1,12 +1,12 @@
 package com.keencho.lib.spring.jpa.querydsl;
 
 import com.keencho.lib.spring.common.exception.KcSystemException;
-import com.querydsl.core.types.*;
+import com.querydsl.core.types.Expression;
+import com.querydsl.core.types.QBean;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class KcQBean<T> extends QBean<T> {
 
