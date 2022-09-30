@@ -8,7 +8,6 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
-import org.springframework.data.querydsl.QSort;
 import org.springframework.data.querydsl.SimpleEntityPathResolver;
 import org.springframework.util.Assert;
 
@@ -27,7 +26,7 @@ public class KcSearchQueryImpl<T> implements KcSearchQuery<T> {
     }
 
     @Override
-    public List<T> findList(Predicate predicate, QSort sort) {
+    public List<T> findList(Predicate predicate, Sort sort) {
         var q = this.createQuery();
 
         q = this.applyPredicate(q, predicate);
