@@ -1,10 +1,9 @@
 package com.keencho.lib.spring.jpa.querydsl.repository;
 
-import com.keencho.lib.spring.jpa.querydsl.KcProjectionExpression;
-import com.querydsl.core.types.ConstructorExpression;
+import com.keencho.lib.spring.jpa.querydsl.KcQBean;
 import com.querydsl.core.types.EntityPath;
+import com.querydsl.core.types.FactoryExpressionBase;
 import com.querydsl.core.types.Predicate;
-import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 import org.springframework.data.querydsl.QSort;
@@ -37,9 +36,14 @@ public class KcSearchQueryImpl<T> implements KcSearchQuery<T> {
     }
 
     @Override
-    public <P> List<P> selectList(Predicate predicate, KcProjectionExpression<P> kcQueryProjectionClass) {
+    public <P> List<P> selectList(Predicate predicate, FactoryExpressionBase<P> fb) {
+
+        if (fb instanceof KcQBean<P> kc) {
+            fb = kc.build();
+        }
+
         return queryFactory
-                .select(kcQueryProjectionClass.build())
+                .select(fb)
                 .from(path)
                 .where(predicate)
                 .fetch();

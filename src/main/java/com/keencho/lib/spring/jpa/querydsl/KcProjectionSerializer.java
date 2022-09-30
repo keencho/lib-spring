@@ -6,8 +6,6 @@ import org.springframework.lang.NonNull;
 
 import javax.annotation.processing.Generated;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.stream.Collectors;
 
 public class KcProjectionSerializer {
 
@@ -20,7 +18,7 @@ public class KcProjectionSerializer {
 
         // imports
         writer.line("import ", NumberExpression.class.getPackageName(), ".*;");
-        writer.line("import ", KcProjectionExpression.class.getName(), ";");
+        writer.line("import ", KcQBean.class.getName(), ";");
 
         // javadoc
         writer.line("/**");
@@ -34,7 +32,7 @@ public class KcProjectionSerializer {
         String className = getKcQClassName(model);
 
         writer.beginLine("public class " + className);
-        writer.append(" extends ").append(KcProjectionExpression.class.getSimpleName()).append("<").append(model.getSimpleName()).append(">").append(" {");
+        writer.append(" extends ").append(KcQBean.class.getSimpleName()).append("<").append(model.getSimpleName()).append(">").append(" {");
         writer.nl().nl();
 
         // empty constructor
