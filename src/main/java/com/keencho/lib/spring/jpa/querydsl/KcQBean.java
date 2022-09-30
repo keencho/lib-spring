@@ -11,15 +11,18 @@ import java.util.Map;
 public class KcQBean<T> extends QBean<T> {
 
     private final Class<? extends T> type;
+    public final boolean isBuild;
 
     public KcQBean(Class<? extends T> type) {
         super(type);
         this.type = type;
+        this.isBuild = false;
     }
 
     public KcQBean(Class<? extends T> type, Map<String, Expression<?>> bindings) {
         super(type, true, bindings);
         this.type = type;
+        this.isBuild = true;
     }
 
     public QBean<T> build() {

@@ -8,7 +8,6 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
-import org.springframework.data.mapping.PropertyPath;
 import org.springframework.data.querydsl.QSort;
 import org.springframework.data.querydsl.SimpleEntityPathResolver;
 import org.springframework.util.Assert;
@@ -28,17 +27,13 @@ public class KcSearchQueryImpl<T> implements KcSearchQuery<T> {
     }
 
     @Override
-    public List<T> findList(Predicate predicate) {
-        return this.findList(predicate, null);
-    }
-
-    @Override
     public List<T> findList(Predicate predicate, QSort sort) {
-        return queryFactory
-                .selectFrom(path)
-                .where(predicate)
-//                .orderBy(sort)
-                .fetch();
+        var q = this.createQuery();
+
+        q = this.applyPredicate(q, predicate);
+        q = this.applySorting(q, sort);
+
+        return q.select(path).fetch();
     }
 
     @Override
@@ -49,6 +44,7 @@ public class KcSearchQueryImpl<T> implements KcSearchQuery<T> {
          q = this.applySorting(q, sort);
 
         if (factoryExpressionBase instanceof KcQBean<P> kc) {
+            Assert.isTrue(!kc.isBuild, "GFQBean instance must not be build. build should execute at runtime.");
             factoryExpressionBase = kc.build();
         }
 
