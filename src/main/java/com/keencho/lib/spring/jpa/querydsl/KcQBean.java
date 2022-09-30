@@ -34,9 +34,7 @@ public class KcQBean<T> extends QBean<T> {
                     if (v != null) {
                         bindings.put(declaredField.getName(), (Expression<?>) v);
                     }
-                } catch (IllegalAccessException e) {
-                    throw new KcSystemException(e.getMessage());
-                }
+                } catch (IllegalAccessException ignored) { }
             }
         }
 
