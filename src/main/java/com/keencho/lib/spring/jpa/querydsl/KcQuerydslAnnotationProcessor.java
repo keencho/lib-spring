@@ -26,9 +26,6 @@ public class KcQuerydslAnnotationProcessor extends JPAAnnotationProcessor {
     private Configuration conf;
     private ExtendedTypeFactory typeFactory;
 
-    private final Map<String, EntityType> kcProjectionTypes = new HashMap<>();
-    private final Map<String, Set<TypeElement>> typeElements = new HashMap<>();
-
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         var result = super.process(annotations, roundEnv);
@@ -36,20 +33,26 @@ public class KcQuerydslAnnotationProcessor extends JPAAnnotationProcessor {
         this.roundEnv = roundEnv;
         this.conf = super.createConfiguration(this.roundEnv);
         this.typeFactory = new ExtendedTypeFactory(processingEnv, conf.getEntityAnnotations(), conf.getTypeMappings(), conf.getQueryTypeFactory(), conf.getVariableNameFunction());
-        this.generateTarget();
-        this.serialize();
+        this.generateAndSerialize();
 
         return result;
     }
 
-    private void generateTarget() {
+    private void generateAndSerialize() {
         var kcQueryProjectionElement = this.roundEnv.getElementsAnnotatedWith(KcQueryProjection.class);
 
         for (var element : kcQueryProjectionElement) {
             var typeElement = (TypeElement) element;
             var model = this.getEntityType(typeElement);
-            this.typeElements.put(model.getFullName(), Collections.singleton(typeElement));
-            kcProjectionTypes.put(model.getFullName(), model);
+
+            var serializer = new KcProjectionSerializer(element.getAnnotation(KcQueryProjection.class).useSetter());
+            var fullPackageClassName = serializer.getKcFullPackageName(model);
+
+            try (Writer w = conf.getFiler().createFile(processingEnv, fullPackageClassName, Collections.singleton(typeElement))) {
+                var writer = new KcJavaWriter(w);
+                serializer.serialize(model, writer);
+            } catch (IOException ignored) { }
+
         }
     }
 
@@ -62,20 +65,6 @@ public class KcQuerydslAnnotationProcessor extends JPAAnnotationProcessor {
         }
 
         return entityType;
-    }
-
-    private void serialize()  {
-        if (!this.kcProjectionTypes.isEmpty()) {
-            for (var entityType : this.kcProjectionTypes.entrySet()) {
-                var val = entityType.getValue();
-                var fullPackageClassName = KcProjectionSerializer.getKcFullPackageName(val);
-
-                try (Writer w = conf.getFiler().createFile(processingEnv, fullPackageClassName, this.typeElements.get(val.getFullName()))) {
-                    var writer = new KcJavaWriter(w);
-                    KcProjectionSerializer.serialize(val, writer);
-                } catch (IOException ignored) { }
-            }
-        }
     }
 
 }

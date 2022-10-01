@@ -1,6 +1,5 @@
 package com.keencho.lib.spring.jpa.querydsl;
 
-import com.keencho.lib.spring.common.exception.KcSystemException;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.QBean;
 

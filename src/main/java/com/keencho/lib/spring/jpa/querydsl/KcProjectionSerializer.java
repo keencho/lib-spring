@@ -10,8 +10,13 @@ import java.io.IOException;
 public class KcProjectionSerializer {
 
     private static final String CLASS_PREFIX = "KcQ";
+    private final boolean useSetter;
 
-    public static void serialize(final EntityType model, @NonNull KcJavaWriter writer) throws IOException {
+    public KcProjectionSerializer(boolean useSetter) {
+        this.useSetter = useSetter;
+    }
+
+    public void serialize(final EntityType model, @NonNull KcJavaWriter writer) throws IOException {
 
         // package
         writer.line("package ", getPackageWithoutClassName(model), ";").nl();
@@ -36,13 +41,15 @@ public class KcProjectionSerializer {
         writer.nl().nl();
 
         // empty constructor
-        writer.goIn();
-        writer.line("public ", className, "() {");
-        writer.goIn();
-        writer.line("super(", model.getSimpleName(), ".class);");
-        writer.goOut();
-        writer.line("}");
-        writer.nl();
+        if (this.useSetter) {
+            writer.goIn();
+            writer.line("public ", className, "() {");
+            writer.goIn();
+            writer.line("super(", model.getSimpleName(), ".class);");
+            writer.goOut();
+            writer.line("}");
+            writer.nl();
+        }
 
         // builder constructor
         writer.line("public ", className, "(Builder builder) {");
@@ -68,7 +75,10 @@ public class KcProjectionSerializer {
             var name = property.getName();
 
             writer.privateExpressionField(type, name);
-            writer.setterMethod(type, name);
+
+            if (this.useSetter) {
+                writer.setterMethod(type, name);
+            }
         }
 
         // builder method
@@ -111,15 +121,15 @@ public class KcProjectionSerializer {
         writer.line("}");
     }
 
-    public static String getPackageWithoutClassName(EntityType entityType) {
+    public String getPackageWithoutClassName(EntityType entityType) {
         return entityType.getInnerType().getPackageName();
     }
 
-    public static String getKcFullPackageName(EntityType entityType) {
+    public String getKcFullPackageName(EntityType entityType) {
         return getPackageWithoutClassName(entityType) + "." + CLASS_PREFIX + entityType.getInnerType().getSimpleName();
     }
 
-    public static String getKcQClassName(EntityType entityType) {
+    public String getKcQClassName(EntityType entityType) {
         return CLASS_PREFIX + entityType.getInnerType().getSimpleName();
     }
 

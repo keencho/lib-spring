@@ -76,8 +76,7 @@ public class KcSearchQueryImpl<T> implements KcSearchQuery<T> {
                         yield OrderSpecifier.NullHandling.Default;
                 };
 
-                var o = new OrderSpecifier<>(order.isAscending() ? Order.ASC : Order.DESC, Expressions.stringPath(order.getProperty()), nullHandling);
-                query = query.orderBy(o);
+                query = query.orderBy(new OrderSpecifier<>(order.isAscending() ? Order.ASC : Order.DESC, Expressions.stringPath(order.getProperty()), nullHandling));
             }
         }
 
