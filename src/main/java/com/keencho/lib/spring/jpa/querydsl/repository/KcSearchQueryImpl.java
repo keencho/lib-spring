@@ -7,6 +7,9 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 import org.springframework.data.querydsl.SimpleEntityPathResolver;
@@ -18,12 +21,22 @@ import java.util.List;
 public class KcSearchQueryImpl<T> implements KcSearchQuery<T> {
     private final JPAQueryFactory queryFactory;
     private final EntityPath<T> path;
-    private final PathBuilder<?> pathBuilder;
+//    private final PathBuilder<?> pathBuilder;
 
     public KcSearchQueryImpl(JpaEntityInformation<T, ?> entityInformation, EntityManager entityManager) {
         this.queryFactory = new JPAQueryFactory(entityManager);
         this.path = SimpleEntityPathResolver.INSTANCE.createPath(entityInformation.getJavaType());
-        this.pathBuilder = new PathBuilder<T>(path.getType(), path.getMetadata());
+//        this.pathBuilder = new PathBuilder<T>(path.getType(), path.getMetadata());
+    }
+
+    @Override
+    public List<T> findList(Predicate predicate) {
+        return this.findList(predicate, null, null);
+    }
+
+    @Override
+    public List<T> findList(Predicate predicate, KcQueryHandler queryHandler) {
+        return this.findList(predicate, queryHandler, null);
     }
 
     @Override
@@ -38,6 +51,37 @@ public class KcSearchQueryImpl<T> implements KcSearchQuery<T> {
     }
 
     @Override
+    public Page<T> findPage(Predicate predicate, Pageable pageable) {
+        return this.findPage(predicate, pageable, null);
+    }
+
+    @Override
+    public Page<T> findPage(Predicate predicate, Pageable pageable, KcQueryHandler kcQueryHandler) {
+
+        Assert.notNull(pageable, "pageable must not be null!");
+
+        var query = this.createQuery();
+
+        query = this.applyPredicate(query, predicate);
+        query = this.applyQueryHandler(query, kcQueryHandler);
+
+        var totalSize = query.fetch().size();
+        query = this.applyPagination(query, pageable);
+
+        return new PageImpl<>(query.select(path).fetch(), pageable, totalSize);
+    }
+
+    @Override
+    public <P> List<P> selectList(Predicate predicate, FactoryExpressionBase<P> factoryExpressionBase) {
+        return this.selectList(predicate, factoryExpressionBase, null, null);
+    }
+
+    @Override
+    public <P> List<P> selectList(Predicate predicate, FactoryExpressionBase<P> factoryExpressionBase, KcQueryHandler queryHandler) {
+        return this.selectList(predicate, factoryExpressionBase, queryHandler, null);
+    }
+
+    @Override
     public <P> List<P> selectList(Predicate predicate, FactoryExpressionBase<P> factoryExpressionBase, KcQueryHandler queryHandler, Sort sort) {
         var q = this.createQuery();
 
@@ -46,11 +90,39 @@ public class KcSearchQueryImpl<T> implements KcSearchQuery<T> {
         q = this.applySorting(q, sort);
 
         if (factoryExpressionBase instanceof KcQBean<P> kc) {
-            Assert.isTrue(!kc.isBuild, "GFQBean instance must not be build. build should execute at runtime.");
-            factoryExpressionBase = kc.build();
+            if (!kc.isBuild) {
+                factoryExpressionBase = kc.build();
+            }
         }
 
         return q.select(factoryExpressionBase).fetch();
+    }
+
+    @Override
+    public <P> Page<P> selectPage(Predicate predicate, FactoryExpressionBase<P> factoryExpressionBase, Pageable pageable) {
+        return this.selectPage(predicate, factoryExpressionBase, pageable, null);
+    }
+
+    @Override
+    public <P> Page<P> selectPage(Predicate predicate, FactoryExpressionBase<P> factoryExpressionBase, Pageable pageable, KcQueryHandler kcQueryHandler) {
+
+        Assert.notNull(pageable, "pageable must not be null!");
+
+        var query = this.createQuery();
+
+        query = this.applyPredicate(query, predicate);
+        query = this.applyQueryHandler(query, kcQueryHandler);
+
+        var totalSize = query.fetch().size();
+        query = this.applyPagination(query, pageable);
+
+        if (factoryExpressionBase instanceof KcQBean<P> kc) {
+            if (!kc.isBuild) {
+                factoryExpressionBase = kc.build();
+            }
+        }
+
+        return new PageImpl<>(query.select(factoryExpressionBase).fetch(), pageable, totalSize);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////
@@ -92,5 +164,12 @@ public class KcSearchQueryImpl<T> implements KcSearchQuery<T> {
         }
 
         return query;
+    }
+
+    private JPAQuery<?> applyPagination(JPAQuery<?> query, Pageable pageable) {
+
+        query = query.offset(pageable.getOffset()).limit(pageable.getPageSize());
+
+        return this.applySorting(query, pageable.getSort());
     }
 }
