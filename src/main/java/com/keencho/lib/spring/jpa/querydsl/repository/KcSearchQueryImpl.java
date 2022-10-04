@@ -1,6 +1,7 @@
 package com.keencho.lib.spring.jpa.querydsl.repository;
 
 import com.keencho.lib.spring.jpa.querydsl.KcQBean;
+import com.keencho.lib.spring.jpa.querydsl.KcQueryHandler;
 import com.querydsl.core.types.*;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.PathBuilder;
@@ -26,21 +27,23 @@ public class KcSearchQueryImpl<T> implements KcSearchQuery<T> {
     }
 
     @Override
-    public List<T> findList(Predicate predicate, Sort sort) {
+    public List<T> findList(Predicate predicate, KcQueryHandler queryHandler, Sort sort) {
         var q = this.createQuery();
 
         q = this.applyPredicate(q, predicate);
+        q = this.applyQueryHandler(q, queryHandler);
         q = this.applySorting(q, sort);
 
         return q.select(path).fetch();
     }
 
     @Override
-    public <P> List<P> selectList(Predicate predicate, FactoryExpressionBase<P> factoryExpressionBase, Sort sort) {
+    public <P> List<P> selectList(Predicate predicate, FactoryExpressionBase<P> factoryExpressionBase, KcQueryHandler queryHandler, Sort sort) {
         var q = this.createQuery();
 
-         q = this.applyPredicate(q, predicate);
-         q = this.applySorting(q, sort);
+        q = this.applyPredicate(q, predicate);
+        q = this.applyQueryHandler(q, queryHandler);
+        q = this.applySorting(q, sort);
 
         if (factoryExpressionBase instanceof KcQBean<P> kc) {
             Assert.isTrue(!kc.isBuild, "GFQBean instance must not be build. build should execute at runtime.");
@@ -59,6 +62,14 @@ public class KcSearchQueryImpl<T> implements KcSearchQuery<T> {
     private JPAQuery<?> applyPredicate(JPAQuery<?> query, Predicate predicate) {
         if (predicate != null) {
             query = query.where(predicate);
+        }
+
+        return query;
+    }
+
+    private JPAQuery<?> applyQueryHandler(JPAQuery<?> query, KcQueryHandler queryHandler) {
+        if (queryHandler != null) {
+            query = queryHandler.apply(query);
         }
 
         return query;
