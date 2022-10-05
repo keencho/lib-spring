@@ -24,7 +24,7 @@ public class KcExcelDownloader {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private SXSSFWorkbook workbook;
+    private final SXSSFWorkbook workbook;
     private boolean showSequence = false;
     private final LinkedHashMap<String, List<?>> data;
 

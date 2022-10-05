@@ -4,7 +4,6 @@ import com.keencho.lib.spring.jpa.querydsl.KcQBean;
 import com.keencho.lib.spring.jpa.querydsl.KcQueryHandler;
 import com.querydsl.core.types.*;
 import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.data.domain.Page;
@@ -167,9 +166,12 @@ public class KcSearchQueryImpl<T> implements KcSearchQuery<T> {
     }
 
     private JPAQuery<?> applyPagination(JPAQuery<?> query, Pageable pageable) {
+        if (pageable != null) {
+            query = query.offset(pageable.getOffset()).limit(pageable.getPageSize());
 
-        query = query.offset(pageable.getOffset()).limit(pageable.getPageSize());
+            return this.applySorting(query, pageable.getSort());
+        }
 
-        return this.applySorting(query, pageable.getSort());
+        return query;
     }
 }
