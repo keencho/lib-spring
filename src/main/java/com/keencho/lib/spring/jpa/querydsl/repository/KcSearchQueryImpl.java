@@ -16,6 +16,7 @@ import org.springframework.util.Assert;
 
 import javax.persistence.EntityManager;
 import java.util.List;
+import java.util.Map;
 
 public class KcSearchQueryImpl<T> implements KcSearchQuery<T> {
     private final JPAQueryFactory queryFactory;
@@ -122,6 +123,56 @@ public class KcSearchQueryImpl<T> implements KcSearchQuery<T> {
         }
 
         return new PageImpl<>(query.select(factoryExpressionBase).fetch(), pageable, totalSize);
+    }
+
+    @Override
+    public <P> List<P> selectList(Predicate predicate, Class<P> classType, Map<String, Expression<?>> bindings) {
+        Assert.notNull(classType, "classType must not be null!");
+        Assert.notEmpty(bindings, "bindings must not be empty!");
+
+        var expression = Projections.bean(classType, bindings);
+
+        return this.selectList(predicate, expression);
+    }
+
+    @Override
+    public <P> List<P> selectList(Predicate predicate, Class<P> classType, Map<String, Expression<?>> bindings, KcQueryHandler queryHandler) {
+        Assert.notNull(classType, "classType must not be null!");
+        Assert.notEmpty(bindings, "bindings must not be empty!");
+
+        var expression = Projections.bean(classType, bindings);
+
+        return this.selectList(predicate, expression, queryHandler);
+    }
+
+    @Override
+    public <P> List<P> selectList(Predicate predicate, Class<P> classType, Map<String, Expression<?>> bindings, KcQueryHandler queryHandler, Sort sort) {
+        Assert.notNull(classType, "classType must not be null!");
+        Assert.notEmpty(bindings, "bindings must not be empty!");
+
+        var expression = Projections.bean(classType, bindings);
+
+        return this.selectList(predicate, expression, queryHandler, sort);
+    }
+
+    @Override
+    public <P> Page<P> selectPage(Predicate predicate, Class<P> classType, Map<String, Expression<?>> bindings, Pageable pageable) {
+        Assert.notNull(classType, "classType must not be null!");
+        Assert.notEmpty(bindings, "bindings must not be empty!");
+
+        var expression = Projections.bean(classType, bindings);
+
+        return this.selectPage(predicate, expression, pageable);
+    }
+
+    @Override
+    public <P> Page<P> selectPage(Predicate predicate, Class<P> classType, Map<String, Expression<?>> bindings, Pageable pageable, KcQueryHandler kcQueryHandler) {
+        Assert.notNull(classType, "classType must not be null!");
+        Assert.notEmpty(bindings, "bindings must not be empty!");
+
+        var expression = Projections.bean(classType, bindings);
+
+        return this.selectPage(predicate, expression, pageable, kcQueryHandler);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////
