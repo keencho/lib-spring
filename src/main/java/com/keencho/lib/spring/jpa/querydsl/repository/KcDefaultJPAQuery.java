@@ -6,6 +6,7 @@ import com.querydsl.core.types.*;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.querydsl.jpa.impl.JPAUpdateClause;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -15,18 +16,54 @@ import org.springframework.data.querydsl.SimpleEntityPathResolver;
 import org.springframework.util.Assert;
 
 import javax.persistence.EntityManager;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class KcSearchQueryImpl<T> implements KcSearchQuery<T> {
+public class KcDefaultJPAQuery<T> implements KcQueryExecutor<T> {
+    private final EntityManager entityManager;
     private final JPAQueryFactory queryFactory;
     private final EntityPath<T> path;
-//    private final PathBuilder<?> pathBuilder;
 
-    public KcSearchQueryImpl(JpaEntityInformation<T, ?> entityInformation, EntityManager entityManager) {
+    public KcDefaultJPAQuery(JpaEntityInformation<T, ?> entityInformation, EntityManager entityManager) {
+        this.entityManager = entityManager;
         this.queryFactory = new JPAQueryFactory(entityManager);
         this.path = SimpleEntityPathResolver.INSTANCE.createPath(entityInformation.getJavaType());
 //        this.pathBuilder = new PathBuilder<T>(path.getType(), path.getMetadata());
+    }
+
+    @Override
+    public T findOne(Predicate predicate) {
+        return this.findOne(predicate, null);
+    }
+
+    @Override
+    public T findOne(Predicate predicate, KcQueryHandler queryHandler) {
+        var q = this.createQuery();
+
+        q = this.applyPredicate(q, predicate);
+        q = this.applyQueryHandler(q, queryHandler);
+
+        return q.select(path).fetchOne();
+    }
+
+    @Override
+    public <P> P selectOne(Predicate predicate, KcQBean<P> qBean) {
+        return this.selectOne(predicate, qBean, null);
+    }
+
+    @Override
+    public <P> P selectOne(Predicate predicate, KcQBean<P> qBean, KcQueryHandler queryHandler) {
+        var q = this.createQuery();
+
+        q = this.applyPredicate(q, predicate);
+        q = this.applyQueryHandler(q, queryHandler);
+
+        if (!qBean.isBuild) {
+            qBean = qBean.build();
+        }
+
+        return q.select(qBean).fetchOne();
     }
 
     @Override
@@ -72,39 +109,37 @@ public class KcSearchQueryImpl<T> implements KcSearchQuery<T> {
     }
 
     @Override
-    public <P> List<P> selectList(Predicate predicate, FactoryExpressionBase<P> factoryExpressionBase) {
-        return this.selectList(predicate, factoryExpressionBase, null, null);
+    public <P> List<P> selectList(Predicate predicate, KcQBean<P> qBean) {
+        return this.selectList(predicate, qBean, null, null);
     }
 
     @Override
-    public <P> List<P> selectList(Predicate predicate, FactoryExpressionBase<P> factoryExpressionBase, KcQueryHandler queryHandler) {
-        return this.selectList(predicate, factoryExpressionBase, queryHandler, null);
+    public <P> List<P> selectList(Predicate predicate, KcQBean<P> qBean, KcQueryHandler queryHandler) {
+        return this.selectList(predicate, qBean, queryHandler, null);
     }
 
     @Override
-    public <P> List<P> selectList(Predicate predicate, FactoryExpressionBase<P> factoryExpressionBase, KcQueryHandler queryHandler, Sort sort) {
+    public <P> List<P> selectList(Predicate predicate, KcQBean<P> qBean, KcQueryHandler queryHandler, Sort sort) {
         var q = this.createQuery();
 
         q = this.applyPredicate(q, predicate);
         q = this.applyQueryHandler(q, queryHandler);
+
+        if (!qBean.isBuild) {
+            qBean = qBean.build();
+        }
         q = this.applySorting(q, sort);
 
-        if (factoryExpressionBase instanceof KcQBean<P> kc) {
-            if (!kc.isBuild) {
-                factoryExpressionBase = kc.build();
-            }
-        }
-
-        return q.select(factoryExpressionBase).fetch();
+        return q.select(qBean).fetch();
     }
 
     @Override
-    public <P> Page<P> selectPage(Predicate predicate, FactoryExpressionBase<P> factoryExpressionBase, Pageable pageable) {
-        return this.selectPage(predicate, factoryExpressionBase, pageable, null);
+    public <P> Page<P> selectPage(Predicate predicate, KcQBean<P> qBean, Pageable pageable) {
+        return this.selectPage(predicate, qBean, pageable, null);
     }
 
     @Override
-    public <P> Page<P> selectPage(Predicate predicate, FactoryExpressionBase<P> factoryExpressionBase, Pageable pageable, KcQueryHandler kcQueryHandler) {
+    public <P> Page<P> selectPage(Predicate predicate, KcQBean<P> qBean, Pageable pageable, KcQueryHandler kcQueryHandler) {
 
         Assert.notNull(pageable, "pageable must not be null!");
 
@@ -114,15 +149,14 @@ public class KcSearchQueryImpl<T> implements KcSearchQuery<T> {
         query = this.applyQueryHandler(query, kcQueryHandler);
 
         var totalSize = query.fetch().size();
-        query = this.applyPagination(query, pageable);
 
-        if (factoryExpressionBase instanceof KcQBean<P> kc) {
-            if (!kc.isBuild) {
-                factoryExpressionBase = kc.build();
-            }
+        if (!qBean.isBuild) {
+            qBean = qBean.build();
         }
 
-        return new PageImpl<>(query.select(factoryExpressionBase).fetch(), pageable, totalSize);
+        query = this.applyPagination(query, pageable);
+
+        return new PageImpl<>(query.select(qBean).fetch(), pageable, totalSize);
     }
 
     @Override
@@ -130,7 +164,7 @@ public class KcSearchQueryImpl<T> implements KcSearchQuery<T> {
         Assert.notNull(classType, "classType must not be null!");
         Assert.notEmpty(bindings, "bindings must not be empty!");
 
-        var expression = Projections.bean(classType, bindings);
+        var expression = new KcQBean<>(classType, bindings);
 
         return this.selectList(predicate, expression);
     }
@@ -140,7 +174,7 @@ public class KcSearchQueryImpl<T> implements KcSearchQuery<T> {
         Assert.notNull(classType, "classType must not be null!");
         Assert.notEmpty(bindings, "bindings must not be empty!");
 
-        var expression = Projections.bean(classType, bindings);
+        var expression = new KcQBean<>(classType, bindings);
 
         return this.selectList(predicate, expression, queryHandler);
     }
@@ -150,7 +184,7 @@ public class KcSearchQueryImpl<T> implements KcSearchQuery<T> {
         Assert.notNull(classType, "classType must not be null!");
         Assert.notEmpty(bindings, "bindings must not be empty!");
 
-        var expression = Projections.bean(classType, bindings);
+        var expression = new KcQBean<>(classType, bindings);
 
         return this.selectList(predicate, expression, queryHandler, sort);
     }
@@ -160,7 +194,7 @@ public class KcSearchQueryImpl<T> implements KcSearchQuery<T> {
         Assert.notNull(classType, "classType must not be null!");
         Assert.notEmpty(bindings, "bindings must not be empty!");
 
-        var expression = Projections.bean(classType, bindings);
+        var expression = new KcQBean<>(classType, bindings);
 
         return this.selectPage(predicate, expression, pageable);
     }
@@ -170,7 +204,7 @@ public class KcSearchQueryImpl<T> implements KcSearchQuery<T> {
         Assert.notNull(classType, "classType must not be null!");
         Assert.notEmpty(bindings, "bindings must not be empty!");
 
-        var expression = Projections.bean(classType, bindings);
+        var expression = new KcQBean<>(classType, bindings);
 
         return this.selectPage(predicate, expression, pageable, kcQueryHandler);
     }
@@ -224,5 +258,36 @@ public class KcSearchQueryImpl<T> implements KcSearchQuery<T> {
         }
 
         return query;
+    }
+
+    // update clause
+    ///////////////////////////////////////////////////////////////////////////////////////////
+
+    @Override
+    public JPAUpdateClause createUpdateClause() {
+        return new JPAUpdateClause(entityManager, path);
+    }
+
+    @Override
+    public long updateOne(Predicate predicate, Map<Path<?>, ?> data) {
+        Assert.notNull(predicate, "predicate must not be null");
+        Assert.notEmpty(data, "update path data must not be empty!");
+
+        var paths = new ArrayList<Path<?>>();
+        var values = new ArrayList<>();
+
+        for (var e : data.entrySet()) {
+            paths.add(e.getKey());
+            values.add(e.getValue());
+        }
+
+        var result = this.createUpdateClause()
+                .where(predicate)
+                .set(paths, values)
+                .execute();
+
+        Assert.isTrue(result == 1, "update result is not 1");
+
+        return result;
     }
 }

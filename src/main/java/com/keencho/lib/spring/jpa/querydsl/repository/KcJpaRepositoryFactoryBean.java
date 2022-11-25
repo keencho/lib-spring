@@ -38,7 +38,7 @@ public class KcJpaRepositoryFactoryBean<T extends Repository<S, ID>, S, ID> exte
                 var entityInformation = this.getEntityInformation(metadata.getDomainType());
 
                 var impl = super.instantiateClass(
-                        KcSearchQueryImpl.class,
+                        KcDefaultJPAQuery.class,
                         entityInformation, this.entityManager
                 );
 
