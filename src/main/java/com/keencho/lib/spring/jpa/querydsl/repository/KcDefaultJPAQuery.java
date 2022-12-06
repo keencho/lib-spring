@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
+import org.springframework.data.querydsl.QSort;
 import org.springframework.data.querydsl.SimpleEntityPathResolver;
 import org.springframework.util.Assert;
 
@@ -82,7 +83,7 @@ public class KcDefaultJPAQuery<T> implements KcQueryExecutor<T> {
 
         q = this.applyPredicate(q, predicate);
         q = this.applyQueryHandler(q, queryHandler);
-        q = this.applySorting(q, sort);
+        q = this.applySorting(null, q, sort);
 
         return q.select(path).fetch();
     }
@@ -103,7 +104,7 @@ public class KcDefaultJPAQuery<T> implements KcQueryExecutor<T> {
         query = this.applyQueryHandler(query, kcQueryHandler);
 
         var totalSize = query.fetch().size();
-        query = this.applyPagination(query, pageable);
+        query = this.applyPagination(null, query, pageable);
 
         return new PageImpl<>(query.select(path).fetch(), pageable, totalSize);
     }
@@ -128,7 +129,7 @@ public class KcDefaultJPAQuery<T> implements KcQueryExecutor<T> {
         if (!qBean.isBuild) {
             qBean = qBean.build();
         }
-        q = this.applySorting(q, sort);
+        q = this.applySorting(qBean.getBindings(), q, sort);
 
         return q.select(qBean).fetch();
     }
@@ -154,7 +155,7 @@ public class KcDefaultJPAQuery<T> implements KcQueryExecutor<T> {
             qBean = qBean.build();
         }
 
-        query = this.applyPagination(query, pageable);
+        query = this.applyPagination(qBean.getBindings(), query, pageable);
 
         return new PageImpl<>(query.select(qBean).fetch(), pageable, totalSize);
     }
@@ -231,30 +232,74 @@ public class KcDefaultJPAQuery<T> implements KcQueryExecutor<T> {
         return query;
     }
 
-    private JPAQuery<?> applySorting(JPAQuery<?> query, Sort sort) {
-        if (sort != null) {
-            for (var order : sort) {
-                var nullHandling = switch (order.getNullHandling()) {
-                    case NULLS_FIRST:
-                        yield  OrderSpecifier.NullHandling.NullsFirst;
-                    case NULLS_LAST:
-                        yield OrderSpecifier.NullHandling.NullsLast;
-                    case NATIVE:
-                        yield OrderSpecifier.NullHandling.Default;
-                };
+    private OrderSpecifier.NullHandling castToQueryDslNullHandling(Sort.NullHandling nullHandling) {
+        OrderSpecifier.NullHandling result;
 
-                query = query.orderBy(new OrderSpecifier<>(order.isAscending() ? Order.ASC : Order.DESC, Expressions.stringPath(order.getProperty()), nullHandling));
+        switch (nullHandling) {
+            case NULLS_FIRST:
+                result = OrderSpecifier.NullHandling.NullsFirst;
+                break;
+            case NULLS_LAST:
+                result = OrderSpecifier.NullHandling.NullsLast;
+                break;
+            default:
+                result = OrderSpecifier.NullHandling.Default;
+                break;
+        }
+
+        return result;
+    }
+
+    private boolean isAlias(Expression<?> expression) {
+        return expression instanceof Operation && ((Operation<?>) expression).getOperator() == Ops.ALIAS;
+    }
+
+    private String getAlias(Expression<?> expression) {
+        if (!this.isAlias(expression)) {
+            throw new RuntimeException("expression is not alias");
+        }
+        var oe = (Operation<?>) expression;
+        return oe.getArg(1).toString();
+    }
+
+    private JPAQuery<?> applySorting(Map<String, Expression<?>> bindings, JPAQuery<?> query, Sort sort) {
+        if (sort != null) {
+            if (sort instanceof QSort qSort) {
+                var orderSpecifiers = qSort.getOrderSpecifiers();
+                query = query.orderBy(orderSpecifiers.toArray(new OrderSpecifier[0]));
+            } else {
+                for (var order : sort) {
+                    OrderSpecifier.NullHandling nullHandling = this.castToQueryDslNullHandling(order.getNullHandling());
+                    OrderSpecifier<?> os;
+                    if (bindings != null && bindings.containsKey(order.getProperty())) {
+                        var expression = bindings.get(order.getProperty());
+
+                        // 별칭
+                        if (this.isAlias(expression)) {
+                            os = new OrderSpecifier<>(order.isAscending() ? Order.ASC : Order.DESC, Expressions.stringPath(this.getAlias(expression)), nullHandling);
+                        }
+                        // 아닌경우 표현식
+                        else {
+                            os = new OrderSpecifier(order.isAscending() ? Order.ASC : Order.DESC, expression, nullHandling);
+                        }
+
+                    } else {
+                        os = new OrderSpecifier<>(order.isAscending() ? Order.ASC : Order.DESC, Expressions.stringPath(order.getProperty()), nullHandling);
+                    }
+
+                    query = query.orderBy(os);
+                }
             }
         }
 
         return query;
     }
 
-    private JPAQuery<?> applyPagination(JPAQuery<?> query, Pageable pageable) {
+    private JPAQuery<?> applyPagination(Map<String, Expression<?>> bindings, JPAQuery<?> query, Pageable pageable) {
         if (pageable != null) {
             query = query.offset(pageable.getOffset()).limit(pageable.getPageSize());
 
-            return this.applySorting(query, pageable.getSort());
+            return this.applySorting(bindings, query, pageable.getSort());
         }
 
         return query;
