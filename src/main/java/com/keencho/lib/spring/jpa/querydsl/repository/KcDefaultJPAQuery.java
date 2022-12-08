@@ -4,6 +4,7 @@ import com.keencho.lib.spring.jpa.querydsl.KcQBean;
 import com.keencho.lib.spring.jpa.querydsl.KcQueryHandler;
 import com.querydsl.core.types.*;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.impl.JPADeleteClause;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.querydsl.jpa.impl.JPAUpdateClause;
@@ -329,6 +330,27 @@ public class KcDefaultJPAQuery<T> implements KcQueryExecutor<T> {
         var result = this.createUpdateClause()
                 .where(predicate)
                 .set(paths, values)
+                .execute();
+
+        Assert.isTrue(result == 1, "update result is not 1");
+
+        return result;
+    }
+
+    // delete clause
+    ///////////////////////////////////////////////////////////////////////////////////////////
+
+    @Override
+    public JPADeleteClause createDeleteClause() {
+        return new JPADeleteClause(entityManager, path);
+    }
+
+    @Override
+    public long deleteOne(Predicate predicate) {
+        Assert.notNull(predicate, "predicate must not be null");
+
+        var result = this.createDeleteClause()
+                .where(predicate)
                 .execute();
 
         Assert.isTrue(result == 1, "update result is not 1");
