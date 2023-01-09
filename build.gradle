@@ -10,21 +10,22 @@ repositories {
 dependencies {
 
     // spring
-    implementation 'org.springframework.boot:spring-boot-starter-web:2.7.3'
-    apiElements 'org.springframework.boot:spring-boot-starter-web:2.7.3'
+    implementation 'org.springframework.boot:spring-boot-starter-web:3.0.1'
+    apiElements 'org.springframework.boot:spring-boot-starter-web:3.0.1'
 
-    implementation 'org.springframework.boot:spring-boot-starter-security:2.7.3'
-    apiElements 'org.springframework.boot:spring-boot-starter-security:2.7.3'
+    implementation 'org.springframework.boot:spring-boot-starter-security:3.0.1'
+    apiElements 'org.springframework.boot:spring-boot-starter-security:3.0.1'
 
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa:2.7.3'
-    apiElements 'org.springframework.boot:spring-boot-starter-data-jpa:2.7.3'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa:3.0.1'
+    apiElements 'org.springframework.boot:spring-boot-starter-data-jpa:3.0.1'
 
     // query-dsl
-    implementation 'com.querydsl:querydsl-jpa:5.0.0'
-    apiElements 'com.querydsl:querydsl-jpa:5.0.0'
+    // https://github.com/querydsl/querydsl/issues/3233
+    implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
+    apiElements 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
 
-    implementation 'com.querydsl:querydsl-apt:5.0.0'
-    apiElements 'com.querydsl:querydsl-apt:5.0.0'
+    implementation 'com.querydsl:querydsl-apt:5.0.0:jakarta'
+    apiElements 'com.querydsl:querydsl-apt:5.0.0:jakarta'
 
     // jwt
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
@@ -58,7 +59,7 @@ publishing {
         mavenJava(MavenPublication) {
             groupId = 'com.github.keencho'
             artifactId = 'lib-spring'
-            version = '1.0.7'
+            version = '2.0.0'
 
             from components.java
         }

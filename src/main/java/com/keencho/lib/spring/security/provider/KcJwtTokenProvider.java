@@ -1,10 +1,9 @@
 package com.keencho.lib.spring.security.provider;
 
 import com.keencho.lib.spring.security.model.KcSecurityAccount;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.servlet.http.HttpServletRequest;
 
 public interface KcJwtTokenProvider {
 

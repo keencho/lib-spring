@@ -2,8 +2,7 @@ package com.keencho.lib.spring.security.service;
 
 import com.keencho.lib.spring.security.model.KcAccountBaseModel;
 import com.keencho.lib.spring.security.repository.KcAccountRepository;
-
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * 로그인 서비스
