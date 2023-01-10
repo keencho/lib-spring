@@ -59,7 +59,7 @@ publishing {
         mavenJava(MavenPublication) {
             groupId = 'com.github.keencho'
             artifactId = 'lib-spring'
-            version = '2.0.0'
+            version = '2.0.1'
 
             from components.java
         }
@@ -71,4 +71,4 @@ def generateMavenPom = tasks.register("generateMavenPom", GenerateMavenPom) {
     pom = publishing.publications.mavenJava.pom
 }
 
-tasks.compileJava.dependsOn generateMavenPom
+//tasks.compileJava.dependsOn generateMavenPom
