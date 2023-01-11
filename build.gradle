@@ -43,6 +43,10 @@ dependencies {
 
     implementation 'org.apache.poi:poi-ooxml:5.2.2'
     apiElements 'org.apache.poi:poi-ooxml:5.2.2'
+
+    // javax
+    implementation 'javax.persistence:javax.persistence-api:2.2'
+    apiElements 'javax.persistence:javax.persistence-api:2.2'
 }
 
 jar {

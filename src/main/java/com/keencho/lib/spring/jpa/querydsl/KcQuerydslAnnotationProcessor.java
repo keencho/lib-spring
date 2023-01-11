@@ -28,17 +28,6 @@ public class KcQuerydslAnnotationProcessor extends JPAAnnotationProcessor {
     private ExtendedTypeFactory typeFactory;
 
     @Override
-    protected Configuration createConfiguration(RoundEnvironment roundEnv) {
-        Class<? extends Annotation> entity = Entity.class;
-        Class<? extends Annotation> superType = MappedSuperclass.class;
-        Class<? extends Annotation> embeddable = Embeddable.class;
-        Class<? extends Annotation> embedded = Embedded.class;
-        Class<? extends Annotation> skip = Transient.class;
-        return new JPAConfiguration(roundEnv, processingEnv,
-                entity, superType, embeddable, embedded, skip);
-    }
-
-    @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         if (roundEnv.processingOver()) {
             return JPAAnnotationProcessor.ALLOW_OTHER_PROCESSORS_TO_CLAIM_ANNOTATIONS;
