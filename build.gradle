@@ -59,7 +59,7 @@ publishing {
         mavenJava(MavenPublication) {
             groupId = 'com.github.keencho'
             artifactId = 'lib-spring'
-            version = '2.0.2'
+            version = '2.0.21'
 
             from components.java
         }
