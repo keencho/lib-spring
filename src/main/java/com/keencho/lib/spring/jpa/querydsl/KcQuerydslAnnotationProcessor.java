@@ -1,6 +1,7 @@
 package com.keencho.lib.spring.jpa.querydsl;
 
 import com.keencho.lib.spring.jpa.querydsl.annotation.KcQueryProjection;
+import com.querydsl.apt.AbstractQuerydslProcessor;
 import com.querydsl.apt.Configuration;
 import com.querydsl.apt.ExtendedTypeFactory;
 import com.querydsl.apt.jpa.JPAAnnotationProcessor;
@@ -20,8 +21,8 @@ import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.Set;
 
-@SupportedAnnotationTypes({ "com.querydsl.core.annotations.*", "jakarta.persistence.*", "javax.persistence.*"})
-public class KcQuerydslAnnotationProcessor extends JPAAnnotationProcessor {
+@SupportedAnnotationTypes({ "com.keencho.lib.spring.jpa.querydsl.annotation.KcQueryProjection" })
+public class KcQuerydslAnnotationProcessor extends AbstractQuerydslProcessor {
 
     private RoundEnvironment roundEnv;
     private Configuration conf;
@@ -44,14 +45,12 @@ public class KcQuerydslAnnotationProcessor extends JPAAnnotationProcessor {
             return JPAAnnotationProcessor.ALLOW_OTHER_PROCESSORS_TO_CLAIM_ANNOTATIONS;
         }
 
-        var result = super.process(annotations, roundEnv);
-
         this.roundEnv = roundEnv;
         this.conf = this.createConfiguration(this.roundEnv);
         this.typeFactory = new ExtendedTypeFactory(processingEnv, conf.getEntityAnnotations(), conf.getTypeMappings(), conf.getQueryTypeFactory(), conf.getVariableNameFunction());
         this.generateAndSerialize();
 
-        return result;
+        return JPAAnnotationProcessor.ALLOW_OTHER_PROCESSORS_TO_CLAIM_ANNOTATIONS;
     }
 
     private void generateAndSerialize() {
