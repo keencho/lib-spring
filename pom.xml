@@ -8,7 +8,15 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.github.keencho</groupId>
   <artifactId>lib-spring</artifactId>
-  <version>3.0.0</version>
+  <version>3.0.2</version>
+
+  <properties>
+    <spring-boot-starter.version>3.0.2</spring-boot-starter.version>
+    <querydsl.version>5.0.0</querydsl.version>
+    <blaze-persistence.version>1.6.8</blaze-persistence.version>
+    <json-webtoken.version>0.11.5</json-webtoken.version>
+    <poi.version>5.2.2</poi.version>
+  </properties>
 
   <dependencies>
 
@@ -16,60 +24,99 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
-      <version>3.0.1</version>
+      <version>${spring-boot-starter.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-security</artifactId>
-      <version>3.0.1</version>
+      <version>${spring-boot-starter.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-jpa</artifactId>
-      <version>3.0.1</version>
+      <version>${spring-boot-starter.version}</version>
     </dependency>
 
     <!-- QueryDSL -->
     <dependency>
       <groupId>com.querydsl</groupId>
       <artifactId>querydsl-jpa</artifactId>
-      <version>5.0.0</version>
+      <version>${querydsl.version}</version>
       <classifier>jakarta</classifier>
     </dependency>
     <dependency>
       <groupId>com.querydsl</groupId>
       <artifactId>querydsl-apt</artifactId>
-      <version>5.0.0</version>
+      <version>${querydsl.version}</version>
       <classifier>jakarta</classifier>
+    </dependency>
+
+    <!-- Blaze-Persistence -->
+    <dependency>
+      <groupId>com.blazebit</groupId>
+      <artifactId>blaze-persistence-integration-querydsl-expressions-jakarta</artifactId>
+      <version>${blaze-persistence.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.blazebit</groupId>
+      <artifactId>blaze-persistence-integration-hibernate-6.0</artifactId>
+      <version>${blaze-persistence.version}</version>
     </dependency>
 
     <!-- JSON -->
     <dependency>
       <groupId>io.jsonwebtoken</groupId>
       <artifactId>jjwt-api</artifactId>
-      <version>0.11.5</version>
+      <version>${json-webtoken.version}</version>
     </dependency>
     <dependency>
       <groupId>io.jsonwebtoken</groupId>
       <artifactId>jjwt-impl</artifactId>
-      <version>0.11.5</version>
+      <version>${json-webtoken.version}</version>
     </dependency>
     <dependency>
       <groupId>io.jsonwebtoken</groupId>
       <artifactId>jjwt-jackson</artifactId>
-      <version>0.11.5</version>
+      <version>${json-webtoken.version}</version>
     </dependency>
 
     <!-- POI Excel -->
     <dependency>
       <groupId>org.apache.poi</groupId>
       <artifactId>poi</artifactId>
-      <version>5.2.2</version>
+      <version>${poi.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.poi</groupId>
       <artifactId>poi-ooxml</artifactId>
-      <version>5.2.2</version>
+      <version>${poi.version}</version>
+    </dependency>
+
+    <!-- Dependencies for Test -->
+
+    <!-- JUnit -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <version>5.9.2</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- H2 -->
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <version>2.1.214</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.querydsl</groupId>
+      <artifactId>querydsl-apt</artifactId>
+      <version>${querydsl.version}</version>
+      <classifier>jakarta</classifier>
+      <scope>test</scope>
     </dependency>
 
   </dependencies>
