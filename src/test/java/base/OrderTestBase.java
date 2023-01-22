@@ -1,5 +1,6 @@
+package base;
+
 import model.*;
-import org.aspectj.lang.annotation.Before;
 import org.junit.jupiter.api.BeforeAll;
 import utils.DataGenerator;
 
@@ -43,7 +44,7 @@ public class OrderTestBase extends JPATestBase {
     @BeforeAll
     public static void beforeAll() {
         if (entityManager == null) {
-            setupDB();
+            setUp();
         }
         IntStream.range(0, rowNum).forEach(idx -> entityManager.persist(generateOrder(2022, 6, Order_2206.class)));
         IntStream.range(0, rowNum).forEach(idx -> entityManager.persist(generateOrder(2022, 9, Order_2209.class)));
