@@ -1,4 +1,4 @@
-package model;
+package com.keencho.lib.spring.test.model;
 
 public enum OrderStatus {
     RECEIVED("접수"),

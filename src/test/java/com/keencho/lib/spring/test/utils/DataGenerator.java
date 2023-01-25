@@ -1,4 +1,4 @@
-package utils;
+package com.keencho.lib.spring.test.utils;
 
 import java.util.Arrays;
 import java.util.List;

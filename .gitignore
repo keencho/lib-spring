@@ -35,3 +35,6 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Q Classes For Test ###
+src/test/java/generated-sources/*
