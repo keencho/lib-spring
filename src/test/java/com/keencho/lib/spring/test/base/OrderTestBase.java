@@ -1,14 +1,14 @@
 package com.keencho.lib.spring.test.base;
 
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Table;
+import com.keencho.lib.spring.jpa.querydsl.KcQBean;
 import com.keencho.lib.spring.test.model.*;
 import com.keencho.lib.spring.test.utils.DataGenerator;
-import com.querydsl.core.types.EntityPath;
+import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.EntityPathBase;
 import com.querydsl.core.types.dsl.PathBuilder;
 import org.junit.jupiter.api.BeforeAll;
 
+import java.lang.reflect.Modifier;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.IntStream;
@@ -57,6 +57,31 @@ public class OrderTestBase extends JPATestBase {
         entityPathMap.put(Order_2301.class, new AbstractMap.SimpleEntry<>(new EntityPathBase<>(Order_2301.class, "entity"), new PathBuilder<>(Order_2301.class, "entity")));
 
         entityManager.getTransaction().commit();
+    }
+
+    public static <E extends Order, P> KcQBean<P> buildKcQBean(Class<E> entityClass, Class<P> projectionClass, String... excludeFields) {
+        var bindings = new HashMap<String, Expression<?>>();
+
+        var entry = entityPathMap.get(Order_2206.class);
+        var path = entry.getValue();
+
+        for (var projectionField : projectionClass.getDeclaredFields()) {
+            if (Arrays.stream(excludeFields).anyMatch(name -> name.equals(projectionField.getName()))) {
+                continue;
+            }
+            for (var entityField : entityClass.getSuperclass().getDeclaredFields()) {
+                var modifiers = projectionField.getModifiers();
+
+                if (!Modifier.isFinal(modifiers) && !Modifier.isStatic(modifiers)) {
+                    if (projectionField.getName().equals(entityField.getName())) {
+                        bindings.put(projectionField.getName(), path.get(entityField.getName(), entityField.getType()));
+                        break;
+                    }
+                }
+            }
+        }
+
+        return new KcQBean<>(projectionClass, bindings);
     }
 
 }
