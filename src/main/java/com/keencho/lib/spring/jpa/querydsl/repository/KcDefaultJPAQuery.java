@@ -35,7 +35,7 @@ public class KcDefaultJPAQuery<T> implements KcQueryExecutor<T> {
         this.path = SimpleEntityPathResolver.INSTANCE.createPath(entityInformation.getJavaType());
     }
 
-    // 생성된 Q class 가 없거나 이를 사용할 수 없는 경우 - 새로운 EntityPath를 생성함
+    // 생성된 Q class 가 없거나 이를 사용할 수 없는 경우 (unit test) - 새로운 EntityPath를 생성함
     public KcDefaultJPAQuery(Class<T> clazz, EntityManager entityManager) {
         this.entityManager = entityManager;
         this.queryFactory = new JPAQueryFactory(entityManager);

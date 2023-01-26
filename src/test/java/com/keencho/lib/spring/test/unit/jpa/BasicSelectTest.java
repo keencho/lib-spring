@@ -1,4 +1,4 @@
-package com.keencho.lib.spring.test;
+package com.keencho.lib.spring.test.unit.jpa;
 
 import com.keencho.lib.spring.test.base.OrderTestBase;
 import com.keencho.lib.spring.test.dto.OrderDTO;
