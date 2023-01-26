@@ -6,6 +6,7 @@ import com.keencho.lib.spring.test.utils.DataGenerator;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.EntityPathBase;
 import com.querydsl.core.types.dsl.PathBuilder;
+import org.apache.poi.ss.formula.functions.T;
 import org.junit.jupiter.api.BeforeAll;
 
 import java.lang.reflect.Modifier;
@@ -59,10 +60,13 @@ public class OrderTestBase extends JPATestBase {
         entityManager.getTransaction().commit();
     }
 
-    public static <E extends Order, P> KcQBean<P> buildKcQBean(Class<E> entityClass, Class<P> projectionClass, String... excludeFields) {
+    protected static <E extends Order, P> KcQBean<P> buildKcQBean(Class<E> entityClass, Class<P> projectionClass, String... excludeFields) {
         var bindings = new HashMap<String, Expression<?>>();
 
-        var entry = entityPathMap.get(Order_2206.class);
+        var entry = entityPathMap.get(entityClass);
+
+        if (entry == null) throw new RuntimeException("Entity does not exist! check entityPathMap");
+
         var path = entry.getValue();
 
         for (var projectionField : projectionClass.getDeclaredFields()) {
@@ -82,6 +86,14 @@ public class OrderTestBase extends JPATestBase {
         }
 
         return new KcQBean<>(projectionClass, bindings);
+    }
+
+    protected static EntityPathBase<? extends Order> getEntityPath(Class<?> clazz) {
+        return entityPathMap.get(clazz).getKey();
+    }
+
+    protected static PathBuilder<? extends Order> getPathBuilder(Class<?> clazz) {
+        return entityPathMap.get(clazz).getValue();
     }
 
 }

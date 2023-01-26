@@ -28,9 +28,8 @@ public class BasicSelectTest extends OrderTestBase {
                 .setParameter(property, value)
                 .getResultList();
 
-        var entry = entityPathMap.get(Order_2206.class);
-        var entity = entry.getKey();
-        var path = entry.getValue();
+        var entity = getEntityPath(Order_2206.class);
+        var path = getPathBuilder(Order_2206.class);
 
         var order2 = jpaQueryFactory()
                 .selectFrom(entity)
@@ -59,9 +58,8 @@ public class BasicSelectTest extends OrderTestBase {
                 .setParameter(property, value)
                 .getResultList();
 
-        var entry = entityPathMap.get(Order_2206.class);
-        var entity = entry.getKey();
-        var path = entry.getValue();
+        var entity = getEntityPath(Order_2206.class);
+        var path = getPathBuilder(Order_2206.class);
         // id, itemName, itemPrice 필드는 조회조건에서 제외
         var bean = buildKcQBean(Order_2206.class, OrderDTO.class, "id", "itemName", "itemPrice");
 

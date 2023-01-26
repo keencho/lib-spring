@@ -3,6 +3,7 @@ package com.keencho.lib.spring.jpa.querydsl.repository;
 import com.keencho.lib.spring.jpa.querydsl.KcQBean;
 import com.keencho.lib.spring.jpa.querydsl.KcQueryHandler;
 import com.querydsl.core.types.*;
+import com.querydsl.core.types.dsl.EntityPathBase;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPADeleteClause;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -27,11 +28,18 @@ public class KcDefaultJPAQuery<T> implements KcQueryExecutor<T> {
     private final JPAQueryFactory queryFactory;
     private final EntityPath<T> path;
 
+    // querydsl 에 의해 성생된 Q class 가 존재하는 경우 - path로 Q 클래스를 사용하도록 함 
     public KcDefaultJPAQuery(JpaEntityInformation<T, ?> entityInformation, EntityManager entityManager) {
         this.entityManager = entityManager;
         this.queryFactory = new JPAQueryFactory(entityManager);
         this.path = SimpleEntityPathResolver.INSTANCE.createPath(entityInformation.getJavaType());
-//        this.pathBuilder = new PathBuilder<T>(path.getType(), path.getMetadata());
+    }
+
+    // 생성된 Q class 가 없거나 이를 사용할 수 없는 경우 - 새로운 EntityPath를 생성함
+    public KcDefaultJPAQuery(Class<T> clazz, EntityManager entityManager) {
+        this.entityManager = entityManager;
+        this.queryFactory = new JPAQueryFactory(entityManager);
+        this.path = new EntityPathBase<>(clazz, "entity");
     }
 
     @Override
