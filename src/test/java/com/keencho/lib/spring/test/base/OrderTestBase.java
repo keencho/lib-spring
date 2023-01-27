@@ -1,18 +1,23 @@
 package com.keencho.lib.spring.test.base;
 
 import com.keencho.lib.spring.jpa.querydsl.KcQBean;
+import com.keencho.lib.spring.test.annotation.SelectExcludeField;
+import com.keencho.lib.spring.test.dto.OrderDTO;
 import com.keencho.lib.spring.test.model.*;
 import com.keencho.lib.spring.test.utils.DataGenerator;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.EntityPathBase;
 import com.querydsl.core.types.dsl.PathBuilder;
 import org.apache.poi.ss.formula.functions.T;
+import org.junit.jupiter.api.AssertionFailureBuilder;
 import org.junit.jupiter.api.BeforeAll;
 
 import java.lang.reflect.Modifier;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.IntStream;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class OrderTestBase extends JPATestBase {
 
@@ -60,7 +65,7 @@ public class OrderTestBase extends JPATestBase {
         entityManager.getTransaction().commit();
     }
 
-    protected static <E extends Order, P> KcQBean<P> buildKcQBean(Class<E> entityClass, Class<P> projectionClass, String... excludeFields) {
+    protected static <E extends Order, P> KcQBean<P> buildKcQBean(Class<E> entityClass, Class<P> projectionClass) {
         var bindings = new HashMap<String, Expression<?>>();
 
         var entry = entityPathMap.get(entityClass);
@@ -70,7 +75,7 @@ public class OrderTestBase extends JPATestBase {
         var path = entry.getValue();
 
         for (var projectionField : projectionClass.getDeclaredFields()) {
-            if (Arrays.stream(excludeFields).anyMatch(name -> name.equals(projectionField.getName()))) {
+            if (projectionField.isAnnotationPresent(SelectExcludeField.class)) {
                 continue;
             }
             for (var entityField : entityClass.getSuperclass().getDeclaredFields()) {
@@ -94,6 +99,34 @@ public class OrderTestBase extends JPATestBase {
 
     protected static PathBuilder<? extends Order> getPathBuilder(Class<?> clazz) {
         return entityPathMap.get(clazz).getValue();
+    }
+
+    protected static void validateOrderDTO(List<OrderDTO> list) {
+        for (var order : list) {
+            for (var field : order.getClass().getDeclaredFields()) {
+
+                field.setAccessible(true);
+                Object value = null;
+                try {
+                    value = field.get(order);
+                } catch (Exception e) {
+                    AssertionFailureBuilder.assertionFailure().message("cannot get value of field via reflection").buildAndThrow();
+                }
+
+                // 제외된 필드의 값은 초기화 상태여야 함
+                if (field.isAnnotationPresent(SelectExcludeField.class)) {
+                    if (field.getType().isAssignableFrom(int.class)) {
+                        assertEquals(value, 0);
+                    } else {
+                        assertNull(value);
+                    }
+                }
+                // 조회대상 필드인 경우 not null 체크
+                else {
+                    assertNotNull(value);
+                }
+            }
+        }
     }
 
 }

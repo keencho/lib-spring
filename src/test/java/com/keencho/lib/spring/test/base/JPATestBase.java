@@ -11,6 +11,7 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.jpa.repository.support.JpaRepositoryFactory;
 import org.springframework.data.repository.core.RepositoryMetadata;
 import org.springframework.data.repository.core.support.RepositoryComposition;
@@ -21,6 +22,7 @@ public class JPATestBase {
     protected static EntityManagerFactory entityManagerFactory;
     protected static EntityManager entityManager;
     protected static CriteriaBuilderFactory criteriaBuilderFactory;
+    protected static ModelMapper modelMapper = new ModelMapper();
 
     // blaze-persistence factory
     protected BlazeJPAQueryFactory blazeJPAQueryFactory() {
