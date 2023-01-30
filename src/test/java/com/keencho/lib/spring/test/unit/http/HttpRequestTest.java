@@ -1,34 +1,51 @@
 package com.keencho.lib.spring.test.unit.http;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.keencho.lib.spring.http.KcJavaHttpClient;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.json.JsonParser;
+import org.springframework.core.ParameterizedTypeReference;
 
-import java.io.IOException;
-import java.net.URI;
 import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.util.ArrayList;
-import java.util.Map;
+import java.util.List;
 
 public class HttpRequestTest {
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Item {
+        int userId;
+        int id;
+        String title;
+        String body;
+
+        public void setUserId(int userId) {
+            this.userId = userId;
+        }
+
+        public void setId(int id) {
+            this.id = id;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        public void setBody(String body) {
+            this.body = body;
+        }
+    }
+
     @Test
     @DisplayName("Java Http Client")
-    public void javaHttpClient() throws IOException, InterruptedException {
-        var mapper = new ObjectMapper();
-        var client = HttpClient.newHttpClient();
+    public void javaHttpClient() {
 
-        var request = HttpRequest
-                .newBuilder()
-                .uri(URI.create("https://jsonplaceholder.typicode.com/posts"))
-                .GET()
-                .build();
+        var client = new KcJavaHttpClient(HttpClient.newHttpClient(), new ObjectMapper());
 
-        var res = client.send(request, HttpResponse.BodyHandlers.ofString());
+        var url = "https://jsonplaceholder.typicode.com/posts";
 
-        System.out.println(mapper.readValue(res.body(), ArrayList.class));
+        var res = client.get(url, null, new ParameterizedTypeReference<List<Item>>() {});
+
+        System.out.println(res);
     }
 }

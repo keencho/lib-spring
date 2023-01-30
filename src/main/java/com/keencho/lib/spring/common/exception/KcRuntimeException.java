@@ -6,6 +6,10 @@ public class KcRuntimeException extends RuntimeException {
         super();
     }
 
+    public KcRuntimeException(Throwable cause) {
+        super(cause);
+    }
+
     public KcRuntimeException(String message) {
         super(message);
     }
