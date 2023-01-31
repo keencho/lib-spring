@@ -6,7 +6,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-public interface KcSpringHttpRequest {
+public interface KcSpringHttpClient {
 
     <T> T call(String url, HttpMethod method, MultiValueMap<String, String> header, MultiValueMap<String, String> queryString, Object body, Class<T> clazz);
 
@@ -60,7 +60,7 @@ public interface KcSpringHttpRequest {
             throw new KcRuntimeException("url already contains query string!");
         }
 
-        return url + ("?" + String.join("&", queryString.entrySet().stream().map(p -> p.getKey() + "=" + p.getValue()).toArray(String[]::new)));
+        return url + ("?" + String.join("&", queryString.entrySet().stream().map(p -> p.getKey() + "=" + p.getValue().get(0)).toArray(String[]::new)));
     }
 
     static MultiValueMap<String, String> createMultiValueMap(String... args) {

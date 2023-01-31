@@ -17,7 +17,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
-public class KcJavaHttpClient implements KcSpringHttpRequest {
+public class KcJavaHttpClient implements KcSpringHttpClient {
 
     final HttpClient client;
     final ObjectMapper objectMapper;
@@ -69,7 +69,7 @@ public class KcJavaHttpClient implements KcSpringHttpRequest {
         }
 
         if (!HttpStatus.valueOf(response.statusCode()).is2xxSuccessful()) {
-            throw new KcHttpException("response status code is not 200");
+            throw new KcHttpException(String.format("status code is not 2xxSuccessful (%d)", response.statusCode()));
         }
 
         return response.body();
