@@ -56,7 +56,7 @@ public class KcDefaultJPAQuery<T> implements KcQueryExecutor<T> {
 
     @Override
     public Map<String, Object> selectOne(Predicate predicate, Map<String, Expression<?>> bindings, KcQueryHandler handler) {
-        return this.selectOne(predicate, bindings, null, null);
+        return this.selectOne(predicate, bindings, handler, null);
     }
 
     @Override
