@@ -59,13 +59,13 @@ public class KcProjectionSerializer {
         writer.line("private static final long serialVersionUID = ", model.hashCode() + "L;");
         writer.nl();
 
-        // field / setter
-        for (var property : properties) {
-            var type = property.getType();
-            var name = property.getName();
-
-            writer.privateExpressionField(type, name);
-        }
+//        // field / setter
+//        for (var property : properties) {
+//            var type = property.getType();
+//            var name = property.getName();
+//
+//            writer.privateExpressionField(type, name);
+//        }
 
         // builder method
         writer.line("public static Builder builder() {");

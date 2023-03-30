@@ -1,6 +1,7 @@
 package com.keencho.lib.spring.jpa.querydsl.repository;
 
 import com.keencho.lib.spring.jpa.querydsl.KcExpression;
+import com.keencho.lib.spring.jpa.querydsl.KcMapExpression;
 import com.keencho.lib.spring.jpa.querydsl.KcQueryHandler;
 import com.querydsl.core.types.EntityPath;
 import com.querydsl.core.types.Expression;
@@ -70,7 +71,7 @@ public class KcDefaultJPAQuery<T> implements KcQueryExecutor<T> {
         q = this.applyQueryHandler(q, handler);
         q = this.applySorting(bindings,q, sort);
 
-        var expression = new KcExpression<Map<String, Object>>((Class) Map.class, bindings);
+        var expression = new KcMapExpression(bindings);
 
         return q.select(expression).fetchOne();
     }

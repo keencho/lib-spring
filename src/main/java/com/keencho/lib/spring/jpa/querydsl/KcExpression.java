@@ -46,20 +46,13 @@ public class KcExpression<T> extends FactoryExpressionBase<T> {
 
     @Override
     public T newInstance(Object... a) {
+
+        if (Map.class.isAssignableFrom(this.type)) {
+            throw new KcRuntimeException("KcExpression class is not suitable for returning map types. Instead, use the KcMapExpression class.");
+        }
+
         try {
             var arr = this.bindings.keySet().toArray();
-            if (Map.class.isAssignableFrom(this.type)) {
-                var map = new LinkedHashMap<String, Object>();
-
-                for (var i = 0; i < a.length; i ++) {
-                    var value = a[i];
-                    if (value != null) {
-                        map.put((String) arr[i], value);
-                    }
-                }
-
-                return (T) map;
-            }
 
             T rv = type.newInstance();
             for (var i = 0; i < a.length; i ++) {
