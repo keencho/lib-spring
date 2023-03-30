@@ -1,29 +1,34 @@
 package com.keencho.lib.spring.jpa.querydsl;
 
-import com.querydsl.codegen.*;
+import com.querydsl.codegen.EntityType;
+import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.NumberExpression;
 import org.springframework.lang.NonNull;
 
 import javax.annotation.processing.Generated;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class KcProjectionSerializer {
 
     private static final String CLASS_PREFIX = "KcQ";
-    private final boolean useSetter;
 
-    public KcProjectionSerializer(boolean useSetter) {
-        this.useSetter = useSetter;
+    public KcProjectionSerializer() {
     }
 
     public void serialize(final EntityType model, @NonNull KcJavaWriter writer) throws IOException {
+        var properties = model.getProperties();
 
         // package
         writer.line("package ", getPackageWithoutClassName(model), ";").nl();
 
         // imports
         writer.line("import ", NumberExpression.class.getPackageName(), ".*;");
-        writer.line("import ", KcQBean.class.getName(), ";");
+        writer.line("import ", Expression.class.getName(), ";");
+        writer.line("import ", KcExpression.class.getName(), ";");
+        writer.line("import ", HashMap.class.getName(), ";");
+        writer.line("import ", Map.class.getName(), ";");
 
         // javadoc
         writer.line("/**");
@@ -37,29 +42,14 @@ public class KcProjectionSerializer {
         String className = getKcQClassName(model);
 
         writer.beginLine("public class " + className);
-        writer.append(" extends ").append(KcQBean.class.getSimpleName()).append("<").append(model.getSimpleName()).append(">").append(" {");
+        writer.append(" extends ").append(KcExpression.class.getSimpleName()).append("<").append(model.getSimpleName()).append(">").append(" {");
         writer.nl().nl();
-
-        // empty constructor
-        if (this.useSetter) {
-            writer.goIn();
-            writer.line("public ", className, "() {");
-            writer.goIn();
-            writer.line("super(", model.getSimpleName(), ".class);");
-            writer.goOut();
-            writer.line("}");
-            writer.nl();
-        }
+        writer.goIn();
 
         // builder constructor
         writer.line("public ", className, "(Builder builder) {");
         writer.goIn();
-        writer.line("super(", model.getSimpleName(), ".class);");
-
-        for (var property : model.getProperties()) {
-            var name = property.getName();
-            writer.line("this.", name, " = builder.", name, ";");
-        }
+        writer.line("super(", model.getSimpleName(), ".class, builder.buildBindings());");
 
         writer.goOut();
         writer.line("}");
@@ -70,15 +60,11 @@ public class KcProjectionSerializer {
         writer.nl();
 
         // field / setter
-        for (var property : model.getProperties()) {
+        for (var property : properties) {
             var type = property.getType();
             var name = property.getName();
 
             writer.privateExpressionField(type, name);
-
-            if (this.useSetter) {
-                writer.setterMethod(type, name);
-            }
         }
 
         // builder method
@@ -95,7 +81,7 @@ public class KcProjectionSerializer {
         writer.goIn();
 
         // builder class field / build method
-        for (var property : model.getProperties()) {
+        for (var property : properties) {
             var type = property.getType();
             var name = property.getName();
 
@@ -103,10 +89,22 @@ public class KcProjectionSerializer {
             writer.builderMethod(type, name);
         }
 
-        // builder class final build method
+        // builder class build method
         writer.line("public ", className, " build() {");
         writer.goIn();
         writer.line("return new ", className, "(this);");
+        writer.goOut();
+        writer.line("}");
+        writer.nl();
+
+        // builder class buildBindings method
+        writer.line("public Map<String, Expression<?>> buildBindings() {");
+        writer.goIn();
+        writer.line("Map<String, Expression<?>> bindings = new HashMap<>();");
+        for (var property : properties) {
+            writer.line(String.format("bindings.put(\"%1$s\", this.%1$s);", property.getName()));
+        }
+        writer.line("return bindings;");
         writer.goOut();
         writer.line("}");
         writer.nl();

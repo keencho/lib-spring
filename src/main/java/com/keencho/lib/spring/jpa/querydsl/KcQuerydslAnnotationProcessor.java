@@ -1,50 +1,39 @@
 package com.keencho.lib.spring.jpa.querydsl;
 
 import com.keencho.lib.spring.jpa.querydsl.annotation.KcQueryProjection;
-import com.querydsl.apt.AbstractQuerydslProcessor;
 import com.querydsl.apt.Configuration;
 import com.querydsl.apt.ExtendedTypeFactory;
 import com.querydsl.apt.jpa.JPAAnnotationProcessor;
-import com.querydsl.apt.jpa.JPAConfiguration;
 import com.querydsl.codegen.EntityType;
 import com.querydsl.codegen.Property;
 import com.querydsl.codegen.utils.model.TypeCategory;
-import jakarta.persistence.*;
 
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
 import java.io.IOException;
 import java.io.Writer;
-import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.Set;
 
-@SupportedAnnotationTypes({ "com.keencho.lib.spring.jpa.querydsl.annotation.KcQueryProjection" })
-public class KcQuerydslAnnotationProcessor extends AbstractQuerydslProcessor {
+@SupportedAnnotationTypes({ "com.keencho.lib.spring.jpa.querydsl.annotation.KcQueryProjection", "com.querydsl.core.annotations.*", "jakarta.persistence.*", "javax.persistence.*" })
+public class KcQuerydslAnnotationProcessor extends JPAAnnotationProcessor {
 
     private RoundEnvironment roundEnv;
     private Configuration conf;
     private ExtendedTypeFactory typeFactory;
 
     @Override
-    protected Configuration createConfiguration(RoundEnvironment roundEnv) {
-        Class<? extends Annotation> entity = Entity.class;
-        Class<? extends Annotation> superType = MappedSuperclass.class;
-        Class<? extends Annotation> embeddable = Embeddable.class;
-        Class<? extends Annotation> embedded = Embedded.class;
-        Class<? extends Annotation> skip = Transient.class;
-        return new JPAConfiguration(roundEnv, processingEnv,
-                entity, superType, embeddable, embedded, skip);
-    }
-
-    @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         if (roundEnv.processingOver()) {
             return JPAAnnotationProcessor.ALLOW_OTHER_PROCESSORS_TO_CLAIM_ANNOTATIONS;
         }
-
+        
+        // process JPAAnnotationProcessor
+        super.process(annotations, roundEnv);
+        
         this.roundEnv = roundEnv;
         this.conf = this.createConfiguration(this.roundEnv);
         this.typeFactory = new ExtendedTypeFactory(processingEnv, conf.getEntityAnnotations(), conf.getTypeMappings(), conf.getQueryTypeFactory(), conf.getVariableNameFunction());
@@ -60,7 +49,7 @@ public class KcQuerydslAnnotationProcessor extends AbstractQuerydslProcessor {
             var typeElement = (TypeElement) element;
             var model = this.getEntityType(typeElement);
 
-            var serializer = new KcProjectionSerializer(element.getAnnotation(KcQueryProjection.class).useSetter());
+            var serializer = new KcProjectionSerializer();
             var fullPackageClassName = serializer.getKcFullPackageName(model);
 
             try (Writer w = conf.getFiler().createFile(processingEnv, fullPackageClassName, Collections.singleton(typeElement))) {
@@ -76,7 +65,12 @@ public class KcQuerydslAnnotationProcessor extends AbstractQuerydslProcessor {
         var entityType = new EntityType(type.as(TypeCategory.ENTITY), this.conf.getVariableNameFunction());
 
         for (var field : ElementFilter.fieldsIn(typeElement.getEnclosedElements())) {
-            entityType.addProperty(new Property(entityType, field.getSimpleName().toString(), this.typeFactory.getType(field.asType(), true)));
+            var modifiers = field.getModifiers();
+
+            // exclude final, static field
+            if (modifiers.stream().noneMatch(modifier -> modifier == Modifier.FINAL || modifier == Modifier.STATIC)) {
+                entityType.addProperty(new Property(entityType, field.getSimpleName().toString(), this.typeFactory.getType(field.asType(), true)));
+            }
         }
 
         return entityType;

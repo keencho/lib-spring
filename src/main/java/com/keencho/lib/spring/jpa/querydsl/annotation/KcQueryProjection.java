@@ -11,5 +11,4 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Target(ElementType.TYPE)
 @Retention(RUNTIME)
 public @interface KcQueryProjection {
-    boolean useSetter() default false;
 }

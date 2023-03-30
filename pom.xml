@@ -11,7 +11,7 @@
   <version>3.0.2</version>
 
   <properties>
-    <spring-boot-starter.version>3.0.2</spring-boot-starter.version>
+    <spring-boot-starter.version>3.0.5</spring-boot-starter.version>
     <querydsl.version>5.0.0</querydsl.version>
     <blaze-persistence.version>1.6.8</blaze-persistence.version>
     <json-webtoken.version>0.11.5</json-webtoken.version>
@@ -91,6 +91,14 @@
       <groupId>org.apache.poi</groupId>
       <artifactId>poi-ooxml</artifactId>
       <version>${poi.version}</version>
+    </dependency>
+
+    <!-- Http Client (Optional) -->
+    <dependency>
+      <groupId>org.apache.httpcomponents.client5</groupId>
+      <artifactId>httpclient5</artifactId>
+      <version>5.2.1</version>
+      <optional>true</optional>
     </dependency>
 
     <!-- Dependencies for Test -->

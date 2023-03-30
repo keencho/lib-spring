@@ -1,8 +1,15 @@
 package com.keencho.lib.spring.jpa.querydsl.repository;
 
-import com.keencho.lib.spring.jpa.querydsl.KcQBean;
+import com.keencho.lib.spring.jpa.querydsl.KcExpression;
 import com.keencho.lib.spring.jpa.querydsl.KcQueryHandler;
-import com.querydsl.core.types.*;
+import com.querydsl.core.types.EntityPath;
+import com.querydsl.core.types.Expression;
+import com.querydsl.core.types.Operation;
+import com.querydsl.core.types.Ops;
+import com.querydsl.core.types.Order;
+import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.Path;
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.EntityPathBase;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPADeleteClause;
@@ -43,6 +50,32 @@ public class KcDefaultJPAQuery<T> implements KcQueryExecutor<T> {
     }
 
     @Override
+    public Map<String, Object> selectOne(Predicate predicate, Map<String, Expression<?>> bindings) {
+        return this.selectOne(predicate, bindings, null);
+    }
+
+    @Override
+    public Map<String, Object> selectOne(Predicate predicate, Map<String, Expression<?>> bindings, KcQueryHandler handler) {
+        return this.selectOne(predicate, bindings, null, null);
+    }
+
+    @Override
+    public Map<String, Object> selectOne(Predicate predicate, Map<String, Expression<?>> bindings, KcQueryHandler handler, Sort sort) {
+        Assert.notNull(bindings, "bindings must not be null!");
+        Assert.notEmpty(bindings, "bindings must not be empty!");
+
+        var q = this.createQuery();
+
+        q = this.applyPredicate(q, predicate);
+        q = this.applyQueryHandler(q, handler);
+        q = this.applySorting(bindings,q, sort);
+
+        var expression = new KcExpression<Map<String, Object>>((Class) Map.class, bindings);
+
+        return q.select(expression).fetchOne();
+    }
+
+    @Override
     public T findOne(Predicate predicate) {
         return this.findOne(predicate, null);
     }
@@ -58,22 +91,18 @@ public class KcDefaultJPAQuery<T> implements KcQueryExecutor<T> {
     }
 
     @Override
-    public <P> P selectOne(Predicate predicate, KcQBean<P> qBean) {
-        return this.selectOne(predicate, qBean, null);
+    public <P> P selectOne(Predicate predicate, KcExpression<P> kcExpression) {
+        return this.selectOne(predicate, kcExpression, null);
     }
 
     @Override
-    public <P> P selectOne(Predicate predicate, KcQBean<P> qBean, KcQueryHandler queryHandler) {
+    public <P> P selectOne(Predicate predicate, KcExpression<P> kcExpression, KcQueryHandler queryHandler) {
         var q = this.createQuery();
 
         q = this.applyPredicate(q, predicate);
         q = this.applyQueryHandler(q, queryHandler);
 
-        if (!qBean.isBuild) {
-            qBean = qBean.build();
-        }
-
-        return q.select(qBean).fetchOne();
+        return q.select(kcExpression).fetchOne();
     }
 
     @Override
@@ -119,37 +148,33 @@ public class KcDefaultJPAQuery<T> implements KcQueryExecutor<T> {
     }
 
     @Override
-    public <P> List<P> selectList(Predicate predicate, KcQBean<P> qBean) {
-        return this.selectList(predicate, qBean, null, null);
+    public <P> List<P> selectList(Predicate predicate, KcExpression<P> expression) {
+        return this.selectList(predicate, expression, null, null);
     }
 
     @Override
-    public <P> List<P> selectList(Predicate predicate, KcQBean<P> qBean, KcQueryHandler queryHandler) {
-        return this.selectList(predicate, qBean, queryHandler, null);
+    public <P> List<P> selectList(Predicate predicate, KcExpression<P> kcExpression, KcQueryHandler queryHandler) {
+        return this.selectList(predicate, kcExpression, queryHandler, null);
     }
 
     @Override
-    public <P> List<P> selectList(Predicate predicate, KcQBean<P> qBean, KcQueryHandler queryHandler, Sort sort) {
+    public <P> List<P> selectList(Predicate predicate, KcExpression<P> kcExpression, KcQueryHandler queryHandler, Sort sort) {
         var q = this.createQuery();
 
         q = this.applyPredicate(q, predicate);
         q = this.applyQueryHandler(q, queryHandler);
+        q = this.applySorting(kcExpression.getBindings(), q, sort);
 
-        if (!qBean.isBuild) {
-            qBean = qBean.build();
-        }
-        q = this.applySorting(qBean.getBindings(), q, sort);
-
-        return q.select(qBean).fetch();
+        return q.select(kcExpression).fetch();
     }
 
     @Override
-    public <P> Page<P> selectPage(Predicate predicate, KcQBean<P> qBean, Pageable pageable) {
-        return this.selectPage(predicate, qBean, pageable, null);
+    public <P> Page<P> selectPage(Predicate predicate, KcExpression<P> kcExpression, Pageable pageable) {
+        return this.selectPage(predicate, kcExpression, pageable, null);
     }
 
     @Override
-    public <P> Page<P> selectPage(Predicate predicate, KcQBean<P> qBean, Pageable pageable, KcQueryHandler kcQueryHandler) {
+    public <P> Page<P> selectPage(Predicate predicate, KcExpression<P> kcExpression, Pageable pageable, KcQueryHandler kcQueryHandler) {
 
         Assert.notNull(pageable, "pageable must not be null!");
 
@@ -160,13 +185,9 @@ public class KcDefaultJPAQuery<T> implements KcQueryExecutor<T> {
 
         var totalSize = query.fetch().size();
 
-        if (!qBean.isBuild) {
-            qBean = qBean.build();
-        }
+        query = this.applyPagination(kcExpression.getBindings(), query, pageable);
 
-        query = this.applyPagination(qBean.getBindings(), query, pageable);
-
-        return new PageImpl<>(query.select(qBean).fetch(), pageable, totalSize);
+        return new PageImpl<>(query.select(kcExpression).fetch(), pageable, totalSize);
     }
 
     @Override
@@ -174,7 +195,7 @@ public class KcDefaultJPAQuery<T> implements KcQueryExecutor<T> {
         Assert.notNull(classType, "classType must not be null!");
         Assert.notEmpty(bindings, "bindings must not be empty!");
 
-        var expression = new KcQBean<>(classType, bindings);
+        var expression = new KcExpression<>(classType, bindings);
 
         return this.selectList(predicate, expression);
     }
@@ -184,7 +205,7 @@ public class KcDefaultJPAQuery<T> implements KcQueryExecutor<T> {
         Assert.notNull(classType, "classType must not be null!");
         Assert.notEmpty(bindings, "bindings must not be empty!");
 
-        var expression = new KcQBean<>(classType, bindings);
+        var expression = new KcExpression<>(classType, bindings);
 
         return this.selectList(predicate, expression, queryHandler);
     }
@@ -194,7 +215,7 @@ public class KcDefaultJPAQuery<T> implements KcQueryExecutor<T> {
         Assert.notNull(classType, "classType must not be null!");
         Assert.notEmpty(bindings, "bindings must not be empty!");
 
-        var expression = new KcQBean<>(classType, bindings);
+        var expression = new KcExpression<>(classType, bindings);
 
         return this.selectList(predicate, expression, queryHandler, sort);
     }
@@ -204,7 +225,7 @@ public class KcDefaultJPAQuery<T> implements KcQueryExecutor<T> {
         Assert.notNull(classType, "classType must not be null!");
         Assert.notEmpty(bindings, "bindings must not be empty!");
 
-        var expression = new KcQBean<>(classType, bindings);
+        var expression = new KcExpression<>(classType, bindings);
 
         return this.selectPage(predicate, expression, pageable);
     }
@@ -214,7 +235,7 @@ public class KcDefaultJPAQuery<T> implements KcQueryExecutor<T> {
         Assert.notNull(classType, "classType must not be null!");
         Assert.notEmpty(bindings, "bindings must not be empty!");
 
-        var expression = new KcQBean<>(classType, bindings);
+        var expression = new KcExpression<>(classType, bindings);
 
         return this.selectPage(predicate, expression, pageable, kcQueryHandler);
     }
@@ -242,21 +263,11 @@ public class KcDefaultJPAQuery<T> implements KcQueryExecutor<T> {
     }
 
     private OrderSpecifier.NullHandling castToQueryDslNullHandling(Sort.NullHandling nullHandling) {
-        OrderSpecifier.NullHandling result;
-
-        switch (nullHandling) {
-            case NULLS_FIRST:
-                result = OrderSpecifier.NullHandling.NullsFirst;
-                break;
-            case NULLS_LAST:
-                result = OrderSpecifier.NullHandling.NullsLast;
-                break;
-            default:
-                result = OrderSpecifier.NullHandling.Default;
-                break;
-        }
-
-        return result;
+        return switch (nullHandling) {
+            case NULLS_FIRST -> OrderSpecifier.NullHandling.NullsFirst;
+            case NULLS_LAST -> OrderSpecifier.NullHandling.NullsLast;
+            default -> OrderSpecifier.NullHandling.Default;
+        };
     }
 
     private boolean isAlias(Expression<?> expression) {

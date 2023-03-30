@@ -1,6 +1,6 @@
 package com.keencho.lib.spring.test.base;
 
-import com.keencho.lib.spring.jpa.querydsl.KcQBean;
+import com.keencho.lib.spring.jpa.querydsl.KcExpression;
 import com.keencho.lib.spring.test.annotation.SelectExcludeField;
 import com.keencho.lib.spring.test.dto.OrderDTO;
 import com.keencho.lib.spring.test.model.*;
@@ -8,7 +8,6 @@ import com.keencho.lib.spring.test.utils.DataGenerator;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.EntityPathBase;
 import com.querydsl.core.types.dsl.PathBuilder;
-import org.apache.poi.ss.formula.functions.T;
 import org.junit.jupiter.api.AssertionFailureBuilder;
 import org.junit.jupiter.api.BeforeAll;
 
@@ -65,7 +64,7 @@ public class OrderTestBase extends JPATestBase {
         entityManager.getTransaction().commit();
     }
 
-    protected static <E extends Order, P> KcQBean<P> buildKcQBean(Class<E> entityClass, Class<P> projectionClass) {
+    protected static <E extends Order, P> KcExpression<P> buildKcQBean(Class<E> entityClass, Class<P> projectionClass) {
         var bindings = new HashMap<String, Expression<?>>();
 
         var entry = entityPathMap.get(entityClass);
@@ -90,7 +89,7 @@ public class OrderTestBase extends JPATestBase {
             }
         }
 
-        return new KcQBean<>(projectionClass, bindings);
+        return new KcExpression<>(projectionClass, bindings);
     }
 
     protected static EntityPathBase<? extends Order> getEntityPath(Class<?> clazz) {
