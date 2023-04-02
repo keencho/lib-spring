@@ -1,8 +1,5 @@
 package com.keencho.lib.spring.test.base;
 
-import com.blazebit.persistence.Criteria;
-import com.blazebit.persistence.CriteriaBuilderFactory;
-import com.blazebit.persistence.querydsl.BlazeJPAQueryFactory;
 import com.keencho.lib.spring.jpa.querydsl.repository.KcDefaultJPAQuery;
 import com.keencho.lib.spring.jpa.querydsl.repository.KcSearchQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -21,13 +18,7 @@ public class JPATestBase {
 
     protected static EntityManagerFactory entityManagerFactory;
     protected static EntityManager entityManager;
-    protected static CriteriaBuilderFactory criteriaBuilderFactory;
     protected static ModelMapper modelMapper = new ModelMapper();
-
-    // blaze-persistence factory
-    protected BlazeJPAQueryFactory blazeJPAQueryFactory() {
-        return new BlazeJPAQueryFactory(entityManager, criteriaBuilderFactory);
-    }
 
     // query-dsl factory
     protected JPAQueryFactory jpaQueryFactory() {
@@ -59,10 +50,6 @@ public class JPATestBase {
     public static void setUp() {
         entityManagerFactory = Persistence.createEntityManagerFactory("pu");
         entityManager = entityManagerFactory.createEntityManager();
-
-        var config = Criteria.getDefault();
-        criteriaBuilderFactory = config.createCriteriaBuilderFactory(entityManagerFactory);
-
         entityManager.getTransaction().begin();
     }
 

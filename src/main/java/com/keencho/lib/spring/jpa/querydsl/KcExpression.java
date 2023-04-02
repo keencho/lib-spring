@@ -6,6 +6,7 @@ import com.querydsl.core.types.ExpressionException;
 import com.querydsl.core.types.FactoryExpressionBase;
 import com.querydsl.core.types.Visitor;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -54,7 +55,7 @@ public class KcExpression<T> extends FactoryExpressionBase<T> {
         try {
             var arr = this.bindings.keySet().toArray();
 
-            T rv = type.newInstance();
+            var rv = type.getDeclaredConstructor().newInstance();
             for (var i = 0; i < a.length; i ++) {
                 var value = a[i];
                 if (value != null) {
@@ -65,7 +66,7 @@ public class KcExpression<T> extends FactoryExpressionBase<T> {
             }
 
             return rv;
-        } catch (InstantiationException | IllegalAccessException | NoSuchFieldException e) {
+        } catch (InstantiationException | IllegalAccessException | NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
             throw new ExpressionException(e.getMessage(), e);
         }
     }

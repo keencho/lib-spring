@@ -18,7 +18,7 @@ import java.io.Writer;
 import java.util.Collections;
 import java.util.Set;
 
-@SupportedAnnotationTypes({ "com.keencho.lib.spring.jpa.querydsl.annotation.KcQueryProjection", "com.querydsl.core.annotations.*", "jakarta.persistence.*", "javax.persistence.*" })
+@SupportedAnnotationTypes({ "com.keencho.lib.spring.jpa.querydsl.annotation.KcQueryProjection" })
 public class KcQuerydslAnnotationProcessor extends JPAAnnotationProcessor {
 
     private RoundEnvironment roundEnv;
@@ -30,10 +30,7 @@ public class KcQuerydslAnnotationProcessor extends JPAAnnotationProcessor {
         if (roundEnv.processingOver()) {
             return JPAAnnotationProcessor.ALLOW_OTHER_PROCESSORS_TO_CLAIM_ANNOTATIONS;
         }
-        
-        // process JPAAnnotationProcessor
-        super.process(annotations, roundEnv);
-        
+
         this.roundEnv = roundEnv;
         this.conf = this.createConfiguration(this.roundEnv);
         this.typeFactory = new ExtendedTypeFactory(processingEnv, conf.getEntityAnnotations(), conf.getTypeMappings(), conf.getQueryTypeFactory(), conf.getVariableNameFunction());

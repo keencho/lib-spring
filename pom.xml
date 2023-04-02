@@ -13,7 +13,6 @@
   <properties>
     <spring-boot-starter.version>3.0.5</spring-boot-starter.version>
     <querydsl.version>5.0.0</querydsl.version>
-    <blaze-persistence.version>1.6.8</blaze-persistence.version>
     <json-webtoken.version>0.11.5</json-webtoken.version>
     <poi.version>5.2.2</poi.version>
   </properties>
@@ -49,19 +48,6 @@
       <artifactId>querydsl-apt</artifactId>
       <version>${querydsl.version}</version>
       <classifier>jakarta</classifier>
-    </dependency>
-
-    <!-- Blaze-Persistence -->
-    <dependency>
-      <groupId>com.blazebit</groupId>
-      <artifactId>blaze-persistence-integration-querydsl-expressions-jakarta</artifactId>
-      <version>${blaze-persistence.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.blazebit</groupId>
-      <artifactId>blaze-persistence-integration-hibernate-6.0</artifactId>
-      <version>${blaze-persistence.version}</version>
     </dependency>
 
     <!-- JSON -->

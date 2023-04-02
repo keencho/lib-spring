@@ -6,6 +6,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class KcMapExpression extends KcExpression<Map<String, Object>> {
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public KcMapExpression(Map<String, Expression<?>> bindings) {
         super((Class) Map.class, bindings);
     }
