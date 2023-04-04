@@ -79,14 +79,6 @@
       <version>${poi.version}</version>
     </dependency>
 
-    <!-- Http Client (Optional) -->
-    <dependency>
-      <groupId>org.apache.httpcomponents.client5</groupId>
-      <artifactId>httpclient5</artifactId>
-      <version>5.2.1</version>
-      <optional>true</optional>
-    </dependency>
-
     <!-- Dependencies for Test -->
 
     <!-- JUnit -->

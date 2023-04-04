@@ -25,6 +25,7 @@ public class KcQuerydslAnnotationProcessor extends JPAAnnotationProcessor {
     private Configuration conf;
     private ExtendedTypeFactory typeFactory;
 
+    // TODO: 지금보니까 왜 JPAAnnotationProcessor을 상속하게 만들어뒀지? 그냥 바꾸자.
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         if (roundEnv.processingOver()) {

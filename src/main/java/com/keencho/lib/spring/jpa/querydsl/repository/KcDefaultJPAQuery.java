@@ -71,9 +71,7 @@ public class KcDefaultJPAQuery<T> implements KcQueryExecutor<T> {
         q = this.applyQueryHandler(q, handler);
         q = this.applySorting(bindings,q, sort);
 
-        var expression = new KcMapExpression(bindings);
-
-        return q.select(expression).fetchOne();
+        return q.select(new KcMapExpression(bindings)).fetchOne();
     }
 
     @Override
