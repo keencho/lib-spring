@@ -52,10 +52,14 @@ public class KcExpression<T> extends FactoryExpressionBase<T> {
             throw new KcRuntimeException("KcExpression class is not suitable for returning map types. Instead, use the KcMapExpression class.");
         }
 
+        if (this.type.isRecord()) {
+            throw new KcRuntimeException("KcExpression class is not suitable for returning record types. Instead, use the KcRecordExpression class.");
+        }
+
         try {
             var arr = this.bindings.keySet().toArray();
 
-            var rv = type.getDeclaredConstructor().newInstance();
+            var rv = this.type.getDeclaredConstructor().newInstance();
             for (var i = 0; i < a.length; i ++) {
                 var value = a[i];
                 if (value != null) {
