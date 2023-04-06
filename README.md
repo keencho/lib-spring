@@ -27,41 +27,7 @@ public void queryTest() {
             .fetch();
 }
 ```
-- 개발기록 및 예제 - [블로그](https://keencho.github.io/posts/querydsl-qbuilder-qsetter-2/)  
-
-##### 적용 방법
-Jitpack 추가 필요
-
-```gradle
-dependencies {
-    annotationProcessor 'com.github.keencho:lib-spring:version'
-}
-```
-
-```xml
-<build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.11.0</version>
-
-                <configuration>
-                    <source>17</source>
-                    <target>17</target>
-
-                    <generatedSourcesDirectory>target/generated-sources/querydsl</generatedSourcesDirectory>
-                    <annotationProcessors>
-                        <annotationProcessor>
-                            com.keencho.lib.spring.jpa.querydsl.KcQuerydslAnnotationProcessor
-                        </annotationProcessor>
-                    </annotationProcessors>
-                </configuration>
-            </plugin>
-
-        </plugins>
-    </build>
-```
+- 개발기록 및 예제 - [블로그](https://keencho.github.io/posts/querydsl-qbuilder-qsetter-2/)
 
 #### 2. Custom JPARepository  
 - 쿼리 날릴때마다 발생하는 중복코드를 줄이기 위한 custom repository
@@ -111,8 +77,45 @@ public class SpringApplication {
 }
 ```
 
+### 의존성 추가 / AnnotationProcessor 등록
+Jitpack 추가 필요
 
+```gradle
+dependencies {
+    implementation 'com.github.keencho:lib-spring:version
+    annotationProcessor 'com.github.keencho:lib-spring:version'
+}
+```
 
+```xml
+<dependency>
+    <groupId>com.github.keencho</groupId>
+    <artifactId>lib-spring</artifactId>
+    <version>version</version>
+</dependency>
 
+...
 
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.11.0</version>
 
+            <configuration>
+                <source>17</source>
+                <target>17</target>
+
+                <generatedSourcesDirectory>target/generated-sources/querydsl</generatedSourcesDirectory>
+                <annotationProcessors>
+                    <annotationProcessor>
+                        com.keencho.lib.spring.jpa.querydsl.KcQuerydslAnnotationProcessor
+                    </annotationProcessor>
+                </annotationProcessors>
+            </configuration>
+        </plugin>
+
+    </plugins>
+</build>
+```
