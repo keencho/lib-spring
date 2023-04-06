@@ -82,7 +82,7 @@ Jitpack 추가 필요
 
 ```gradle
 dependencies {
-    implementation 'com.github.keencho:lib-spring:version
+    implementation 'com.github.keencho:lib-spring:version'
     annotationProcessor 'com.github.keencho:lib-spring:version'
 }
 ```
