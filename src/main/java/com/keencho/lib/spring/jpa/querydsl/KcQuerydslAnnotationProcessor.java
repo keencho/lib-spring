@@ -32,7 +32,6 @@ public class KcQuerydslAnnotationProcessor extends AbstractProcessor {
 
     private List<? extends Element> elementList;
 
-    // TODO: 지금보니까 왜 JPAAnnotationProcessor을 상속하게 만들어뒀지? 그냥 바꾸자.
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
 

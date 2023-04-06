@@ -14,11 +14,19 @@ public class KcRecordExpression<T extends Record> extends KcExpression<T> {
 
     public KcRecordExpression(Class<? extends T> type, Map<String, Expression<?>> bindings) {
         super(type, bindings);
+        if (!type.isRecord()) {
+            throw new KcRuntimeException("This expression is an expression for record. Use KcExpression to bind a regular class.");
+        }
+
         this.type = type;
     }
 
     @Override
     public T newInstance(Object... a) {
+        if (this.type.getDeclaredFields().length != a.length) {
+            throw new KcRuntimeException("Because a record type must create an object as a constructor that accepts all variables as arguments, the number of declared fields and the number of parameters to bind must be the same.");
+        }
+
         try {
             var arr = getBindings().keySet().toArray();
             var fields = new Field[a.length];
@@ -30,10 +38,6 @@ public class KcRecordExpression<T extends Record> extends KcExpression<T> {
                     .stream(this.type.getConstructors())
                     .filter(constructor -> {
                         var parameterTypes = constructor.getParameterTypes();
-                        if (parameterTypes.length != a.length) {
-                            return false;
-                        }
-
                         for (var i = 0; i < a.length; i ++) {
                             var constructorType = parameterTypes[i];
                             var field = fields[i];
