@@ -117,7 +117,7 @@ public class KcQuerydslAnnotationProcessor extends AbstractProcessor {
                                     return new %s(this);
                                 }
                                 
-                                public Map<String, Expression<?>> buildBindings() {
+                                private Map<String, Expression<?>> buildBindings() {
                                     Map<String, Expression<?>> bindings = new LinkedHashMap<>();
                                     %s
                                     
