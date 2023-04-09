@@ -189,6 +189,7 @@ public class KcExcelDownloader {
         var outputStream = response.getOutputStream();
         workbook.write(outputStream);
         workbook.close();
+        workbook.dispose();
 
         outputStream.close();
     }
