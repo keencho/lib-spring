@@ -4,6 +4,8 @@ import com.keencho.lib.spring.jpa.querydsl.annotation.KcQueryProjection;
 import com.querydsl.core.types.Expression;
 
 import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.Messager;
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
@@ -14,6 +16,7 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeKind;
+import javax.tools.Diagnostic;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -30,7 +33,13 @@ public class KcQuerydslAnnotationProcessor extends AbstractProcessor {
 
     private final String PREFIX = "KcQ";
 
-    private List<? extends Element> elementList;
+    private Messager messager;
+
+    @Override
+    public synchronized void init(ProcessingEnvironment processingEnv) {
+        super.init(processingEnv);
+        this.messager = processingEnv.getMessager();
+    }
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
@@ -41,11 +50,12 @@ public class KcQuerydslAnnotationProcessor extends AbstractProcessor {
             return true;
         }
 
+        messager.printMessage(Diagnostic.Kind.NOTE, String.format("$s: $d target classes found.", getClass().getSimpleName(), elements.size()));
         for (var element : elements) {
             var typeElement = (TypeElement) element;
             var isRecord = typeElement.getKind() == ElementKind.RECORD;
 
-            elementList = typeElement
+            var elementList = typeElement
                     .getEnclosedElements()
                     .stream()
                     .filter(el -> {
@@ -66,8 +76,6 @@ public class KcQuerydslAnnotationProcessor extends AbstractProcessor {
                         return el.getKind() == ElementKind.FIELD && el instanceof VariableElement;
                     })
                     .collect(Collectors.toList());
-
-            if (elementList.isEmpty()) continue;
 
             // 패키지명
             var packageName = processingEnv.getElementUtils().getPackageOf(element).getQualifiedName().toString();
@@ -153,20 +161,23 @@ public class KcQuerydslAnnotationProcessor extends AbstractProcessor {
                         originalClass,
 
                         // 빌더 클래스 필드
-                        builderFields(),
+                        builderFields(elementList),
 
                         // 빌더 클래스 빌드 메소드
                         clazz,
                         clazz,
 
                         // 빌더 클래스 바인딩
-                        builderBindings()
+                        builderBindings(elementList)
                         )
                 );
 
                 writer.close();
             } catch (IOException ex) {
-
+                messager.printMessage(Diagnostic.Kind.ERROR, String.format(
+                        "%s: error occurred while generate %s class / %s",
+                        getClass().getSimpleName(), KcExpression.class.getSimpleName(), ex.getMessage()
+                ));
             }
         }
 
@@ -185,7 +196,7 @@ public class KcQuerydslAnnotationProcessor extends AbstractProcessor {
         PRIMITIVE_TO_WRAPPER.put(TypeKind.DOUBLE, Double.class);
     }
 
-    private String builderFields() {
+    private String builderFields(List<? extends Element> elementList) {
         return elementList
                 .stream()
                 .map(element -> {
@@ -213,7 +224,7 @@ public class KcQuerydslAnnotationProcessor extends AbstractProcessor {
                 .replace("\n", "\n\t\t");
     }
 
-    private String builderBindings() {
+    private String builderBindings(List<? extends Element> elementList) {
         return elementList
                 .stream()
                 .map(element -> {

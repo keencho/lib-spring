@@ -21,7 +21,7 @@ public void queryTest() {
     bb.and(q.fromAddress.startsWith("c"));
 
     var list = queryFactory
-            .select(simpleDTO.build())
+            .select(simpleDTO)
             .from(q)
             .where(predicate)
             .fetch();
