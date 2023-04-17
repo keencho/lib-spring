@@ -37,6 +37,7 @@ public class KcDefaultJPAQuery<T> implements KcQueryExecutor<T> {
     private final EntityPath<T> path;
 
     // querydsl 에 의해 성생된 Q class 가 존재하는 경우 - path로 Q 클래스를 사용하도록 함 
+    // KcJpaRepositoryFactoryBean에서 이 생성자 사용하여 repository 등록
     public KcDefaultJPAQuery(JpaEntityInformation<T, ?> entityInformation, EntityManager entityManager) {
         this.entityManager = entityManager;
         this.queryFactory = new JPAQueryFactory(entityManager);

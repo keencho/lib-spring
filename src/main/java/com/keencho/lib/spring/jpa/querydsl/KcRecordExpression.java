@@ -21,6 +21,7 @@ public class KcRecordExpression<T extends Record> extends KcExpression<T> {
         this.type = type;
     }
 
+    // 무조건 기본 생성자
     @Override
     public T newInstance(Object... a) {
         if (this.type.getDeclaredFields().length != a.length) {
@@ -34,6 +35,7 @@ public class KcRecordExpression<T extends Record> extends KcExpression<T> {
                 fields[i] = this.type.getDeclaredField((String) arr[i]);
             }
 
+            // (int a, String a) 가 기본생성자라고 가정하면 (String a, int a)는 걸러지게 된다.
             var matchedConstructor = Arrays
                     .stream(this.type.getConstructors())
                     .filter(constructor -> {
@@ -47,10 +49,12 @@ public class KcRecordExpression<T extends Record> extends KcExpression<T> {
                         }
 
                         return true;
-                    }).toList();
+                    })
+                    .toList();
 
 
             // 파라미터의 갯수와 타입이 동일한 생성자는 한개여야함.
+            // 사실 생성자가 N개여도 조건(파라미터 갯수, 타입 일치) 에 부합하는 생성자는 하나일 수밖에 없다.
             // class(String a, String b) class(String b, String a) 와 같이 순서만 바꾼 경우도 있겠지만 이 경우 제대로된 데이터가 바인딩 된다는 보장이 없으므로 그냥 생성자는 한개로 제한
             // 위와같은 경우 그냥 클래스 쓰자.
 
