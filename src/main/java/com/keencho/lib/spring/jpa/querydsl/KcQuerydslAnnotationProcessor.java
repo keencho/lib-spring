@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 @SupportedSourceVersion(SourceVersion.RELEASE_17)
 public class KcQuerydslAnnotationProcessor extends AbstractProcessor {
 
-    private final String PREFIX = "KcQ";
+    private static final String PREFIX = "KcQ";
 
     private Messager messager;
 
@@ -50,7 +50,7 @@ public class KcQuerydslAnnotationProcessor extends AbstractProcessor {
             return true;
         }
 
-        messager.printMessage(Diagnostic.Kind.NOTE, String.format("$s: $d target classes found.", getClass().getSimpleName(), elements.size()));
+        messager.printMessage(Diagnostic.Kind.NOTE, String.format("%s: %d target classes found.", getClass().getSimpleName(), elements.size()));
         for (var element : elements) {
             var typeElement = (TypeElement) element;
             var isRecord = typeElement.getKind() == ElementKind.RECORD;
