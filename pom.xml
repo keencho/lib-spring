@@ -8,7 +8,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.github.keencho</groupId>
   <artifactId>lib-spring</artifactId>
-  <version>3.0.2</version>
+  <version>3.0.3</version>
 
   <properties>
     <spring-boot-starter.version>3.0.5</spring-boot-starter.version>

@@ -21,7 +21,7 @@ public class KcRecordExpression<T extends Record> extends KcExpression<T> {
         this.type = type;
     }
 
-    // 무조건 기본 생성자
+    // 무조건 기본 생성자 사용해야함
     @Override
     public T newInstance(Object... a) {
         if (this.type.getDeclaredFields().length != a.length) {

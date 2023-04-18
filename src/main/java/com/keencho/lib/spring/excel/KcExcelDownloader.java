@@ -72,17 +72,15 @@ public class KcExcelDownloader {
 
     private void create() throws IOException {
         // 엑셀 어노테이션 검증
-        data.forEach((k,v) -> {
-            v.stream().findFirst().ifPresent(i -> {
-                var clazz = i.getClass();
-                if (!clazz.isAnnotationPresent(KcExcelDocument.class)) {
-                    if (logger.isDebugEnabled()) {
-                        logger.info("error occurred while validate excel document object: KcExcelDocument annotation must be presented!");
-                    }
-                    throw new KcExcelNotEffectiveClassException();
+        data.forEach((k,v) -> v.stream().findFirst().ifPresent(i -> {
+            var clazz = i.getClass();
+            if (!clazz.isAnnotationPresent(KcExcelDocument.class)) {
+                if (logger.isDebugEnabled()) {
+                    logger.info("error occurred while validate excel document object: KcExcelDocument annotation must be presented!");
                 }
-            });
-        });
+                throw new KcExcelNotEffectiveClassException();
+            }
+        }));
 
         /////////////////////////////////////////////////
         //////////////////// 엑셀 write 시작

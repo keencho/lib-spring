@@ -33,13 +33,9 @@ public class KcJpaRepositoryFactoryBean<T extends Repository<S, ID>, S, ID> exte
         protected RepositoryComposition.RepositoryFragments getRepositoryFragments(RepositoryMetadata metadata) {
             var fragments = super.getRepositoryFragments(metadata);
 
-            if (KcSearchQuery.class.isAssignableFrom(metadata.getRepositoryInterface())) {
+            if (KcJpaRepository.class.isAssignableFrom(metadata.getRepositoryInterface())) {
                 var entityInformation = this.getEntityInformation(metadata.getDomainType());
-
-                var impl = super.instantiateClass(
-                        KcDefaultJPAQuery.class,
-                        entityInformation, this.entityManager
-                );
+                var impl = new KcDefaultJPAQuery<>(entityInformation, this.entityManager);
 
                 fragments = fragments.append(RepositoryFragment.implemented(impl));
             }

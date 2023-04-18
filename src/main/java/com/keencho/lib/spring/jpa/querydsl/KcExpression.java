@@ -36,7 +36,7 @@ public class KcExpression<T> extends FactoryExpressionBase<T> {
         );
     }
 
-    protected Map<String, Expression<?>> getBindings() {
+    public Map<String, Expression<?>> getBindings() {
         return this.bindings;
     }
 

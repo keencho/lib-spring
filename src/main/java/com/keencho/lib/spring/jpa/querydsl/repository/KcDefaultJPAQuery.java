@@ -372,7 +372,7 @@ public class KcDefaultJPAQuery<T> implements KcQueryExecutor<T> {
                 .where(predicate)
                 .execute();
 
-        Assert.isTrue(result == 1, "update result is not 1");
+        Assert.isTrue(result == 1, "delete result is not 1");
 
         return result;
     }
