@@ -8,6 +8,7 @@ import org.springframework.data.repository.core.RepositoryMetadata;
 import org.springframework.data.repository.core.support.RepositoryComposition;
 import org.springframework.data.repository.core.support.RepositoryFactorySupport;
 import org.springframework.data.repository.core.support.RepositoryFragment;
+import org.springframework.lang.NonNull;
 
 // https://stackoverflow.com/questions/53083047/replacing-deprecated-querydsljparepository-with-querydsljpapredicateexecutor-fai/53960209#53960209
 // https://stackoverflow.com/questions/65018796/why-do-i-need-a-fragment-interface-for-repositories-that-stand-on-their-own
@@ -17,7 +18,7 @@ public class KcJpaRepositoryFactoryBean<T extends Repository<S, ID>, S, ID> exte
     }
 
     @Override
-    protected RepositoryFactorySupport createRepositoryFactory(EntityManager entityManager) {
+    protected @NonNull RepositoryFactorySupport createRepositoryFactory(@NonNull EntityManager entityManager) {
         return new KcQueryDSLRepositoryFactory(entityManager);
     }
 
@@ -30,7 +31,7 @@ public class KcJpaRepositoryFactoryBean<T extends Repository<S, ID>, S, ID> exte
         }
 
         @Override
-        protected RepositoryComposition.RepositoryFragments getRepositoryFragments(RepositoryMetadata metadata) {
+        protected @NonNull RepositoryComposition.RepositoryFragments getRepositoryFragments(@NonNull RepositoryMetadata metadata) {
             var fragments = super.getRepositoryFragments(metadata);
 
             if (KcJpaRepository.class.isAssignableFrom(metadata.getRepositoryInterface())) {
