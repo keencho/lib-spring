@@ -11,7 +11,7 @@
   <version>3.0.3</version>
 
   <properties>
-    <spring-boot-starter.version>3.0.5</spring-boot-starter.version>
+    <spring-boot-starter.version>3.1.1</spring-boot-starter.version>
     <querydsl.version>5.0.0</querydsl.version>
     <json-webtoken.version>0.11.5</json-webtoken.version>
     <poi.version>5.2.2</poi.version>
