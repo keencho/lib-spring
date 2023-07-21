@@ -57,6 +57,7 @@ public class OrderTestBase extends JPATestBase {
         IntStream.range(0, targetRowNum).forEach(idx -> entityManager.persist(generateOrder(2022, 9, Order_2209.class)));
         IntStream.range(0, targetRowNum).forEach(idx -> entityManager.persist(generateOrder(2023, 1, Order_2301.class)));
 
+
         entityPathMap.put(Order_2206.class, new AbstractMap.SimpleEntry<>(new EntityPathBase<>(Order_2206.class, "entity"), new PathBuilder<>(Order_2206.class, "entity")));
         entityPathMap.put(Order_2209.class, new AbstractMap.SimpleEntry<>(new EntityPathBase<>(Order_2209.class, "entity"), new PathBuilder<>(Order_2209.class, "entity")));
         entityPathMap.put(Order_2301.class, new AbstractMap.SimpleEntry<>(new EntityPathBase<>(Order_2301.class, "entity"), new PathBuilder<>(Order_2301.class, "entity")));

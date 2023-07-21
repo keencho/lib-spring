@@ -6,8 +6,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR)
-public class KcExcelNotEffectiveClassException extends KcRuntimeException {
-    public KcExcelNotEffectiveClassException() {
+public class KcExcelNotEffectiveClassIncludeException extends KcRuntimeException {
+    public KcExcelNotEffectiveClassIncludeException() {
         super("유효하지 않은 대상 클래스가 포함되어 있습니다.");
     }
 }

@@ -1,7 +1,7 @@
 package com.keencho.lib.spring.security.repository;
 
+import com.keencho.lib.spring.jpa.querydsl.repository.KcJpaRepository;
 import com.keencho.lib.spring.security.model.KcAccountBaseModel;
-import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
  * 계정 기본 레포지토리
@@ -10,6 +10,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * @param <T> entity extends KcAccountBase
  * @param <ID> entity id
  */
-public interface KcAccountRepository<T extends KcAccountBaseModel, ID> extends JpaRepository<T, ID> {
+public interface KcAccountRepository<T extends KcAccountBaseModel, ID> extends KcJpaRepository<T, ID> {
     T findByLoginId(String loginId);
 }

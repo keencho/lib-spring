@@ -4,7 +4,7 @@ import com.keencho.lib.spring.common.utils.KcReflectionUtils;
 import com.keencho.lib.spring.excel.annotation.KcExcelColumn;
 import com.keencho.lib.spring.excel.annotation.KcExcelDocument;
 import com.keencho.lib.spring.excel.exception.KcExcelNoDataException;
-import com.keencho.lib.spring.excel.exception.KcExcelNotEffectiveClassException;
+import com.keencho.lib.spring.excel.exception.KcExcelNotEffectiveClassIncludeException;
 import com.keencho.lib.spring.excel.resolver.KcExcelMaskingDefaultResolver;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.poi.ss.usermodel.Cell;
@@ -72,15 +72,19 @@ public class KcExcelDownloader {
 
     private void create() throws IOException {
         // 엑셀 어노테이션 검증
-        data.forEach((k,v) -> v.stream().findFirst().ifPresent(i -> {
-            var clazz = i.getClass();
-            if (!clazz.isAnnotationPresent(KcExcelDocument.class)) {
-                if (logger.isDebugEnabled()) {
-                    logger.info("error occurred while validate excel document object: KcExcelDocument annotation must be presented!");
-                }
-                throw new KcExcelNotEffectiveClassException();
-            }
-        }));
+        data.forEach((k,v) -> v.stream().findFirst()
+                .ifPresentOrElse(
+                        i -> {
+                            var clazz = i.getClass();
+                            if (!clazz.isAnnotationPresent(KcExcelDocument.class)) {
+                                if (logger.isDebugEnabled()) {
+                                    logger.info("error occurred while validate excel document object: KcExcelDocument annotation must be presented!");
+                                }
+                                throw new KcExcelNotEffectiveClassIncludeException();
+                            }
+                        },
+                        () -> { throw new KcExcelNoDataException(); }
+                ));
 
         /////////////////////////////////////////////////
         //////////////////// 엑셀 write 시작
