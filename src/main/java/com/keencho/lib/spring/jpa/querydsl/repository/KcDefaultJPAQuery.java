@@ -13,6 +13,7 @@ import com.querydsl.core.types.Path;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.EntityPathBase;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.Wildcard;
 import com.querydsl.jpa.impl.JPADeleteClause;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -183,11 +184,11 @@ public class KcDefaultJPAQuery<T> implements KcQueryExecutor<T> {
         query = this.applyPredicate(query, predicate);
         query = this.applyQueryHandler(query, kcQueryHandler);
 
-        var totalSize = query.fetch().size();
+        var totalSize = query.select(Wildcard.count).fetchOne();
 
         query = this.applyPagination(kcExpression.getBindings(), query, pageable);
 
-        return new PageImpl<>(query.select(kcExpression).fetch(), pageable, totalSize);
+        return new PageImpl<>(query.select(kcExpression).fetch(), pageable, totalSize == null ? 0L : totalSize);
     }
 
     @Override
