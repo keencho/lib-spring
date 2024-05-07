@@ -142,10 +142,11 @@ public class KcDefaultJPAQuery<T> implements KcQueryExecutor<T> {
         query = this.applyPredicate(query, predicate);
         query = this.applyQueryHandler(query, kcQueryHandler);
 
-        var totalSize = query.fetch().size();
+        var totalSize = query.select(Wildcard.count).fetchOne();
+
         query = this.applyPagination(null, query, pageable);
 
-        return new PageImpl<>(query.select(path).fetch(), pageable, totalSize);
+        return new PageImpl<>(query.select(path).fetch(), pageable, totalSize == null ? 0L : totalSize);
     }
 
     @Override
@@ -182,10 +183,10 @@ public class KcDefaultJPAQuery<T> implements KcQueryExecutor<T> {
         var query = this.createQuery();
 
         query = this.applyPredicate(query, predicate);
+        query = this.applyQueryHandler(query, kcQueryHandler);
 
         var totalSize = query.select(Wildcard.count).fetchOne();
 
-        query = this.applyQueryHandler(query, kcQueryHandler);
         query = this.applyPagination(kcExpression.getBindings(), query, pageable);
 
         return new PageImpl<>(query.select(kcExpression).fetch(), pageable, totalSize == null ? 0L : totalSize);
