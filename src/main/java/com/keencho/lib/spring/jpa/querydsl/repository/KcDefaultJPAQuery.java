@@ -337,6 +337,19 @@ public class KcDefaultJPAQuery<T> implements KcQueryExecutor<T> {
 
     @Override
     public long updateOne(Predicate predicate, Map<Path<?>, ?> data) {
+        var result = this.doUpdate(predicate, data);
+
+        Assert.isTrue(result == 1, "update result is not 1");
+
+        return result;
+    }
+
+    @Override
+    public long update(Predicate predicate, Map<Path<?>, ?> data) {
+        return this.doUpdate(predicate, data);
+    }
+
+    private long doUpdate(Predicate predicate, Map<Path<?>, ?> data) {
         Assert.notNull(predicate, "predicate must not be null");
         Assert.notEmpty(data, "update path data must not be empty!");
 
@@ -348,14 +361,10 @@ public class KcDefaultJPAQuery<T> implements KcQueryExecutor<T> {
             values.add(e.getValue());
         }
 
-        var result = this.createUpdateClause()
+        return this.createUpdateClause()
                 .where(predicate)
                 .set(paths, values)
                 .execute();
-
-        Assert.isTrue(result == 1, "update result is not 1");
-
-        return result;
     }
 
     // delete clause
@@ -368,14 +377,23 @@ public class KcDefaultJPAQuery<T> implements KcQueryExecutor<T> {
 
     @Override
     public long deleteOne(Predicate predicate) {
-        Assert.notNull(predicate, "predicate must not be null");
+        var result = this.doDelete(predicate);
 
-        var result = this.createDeleteClause()
-                .where(predicate)
-                .execute();
-
-        Assert.isTrue(result == 1, "delete result is not 1");
+        Assert.isTrue(result == 1, "update result is not 1");
 
         return result;
+    }
+
+    @Override
+    public long delete(Predicate predicate) {
+        return this.doDelete(predicate);
+    }
+
+    private long doDelete(Predicate predicate) {
+        Assert.notNull(predicate, "predicate must not be null");
+
+        return this.createDeleteClause()
+                .where(predicate)
+                .execute();
     }
 }

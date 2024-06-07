@@ -8,10 +8,9 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.github.keencho</groupId>
   <artifactId>lib-spring</artifactId>
-  <version>3.2.5</version>
+  <version>3.3.0</version>
 
   <properties>
-    <spring-boot-starter.version>3.1.1</spring-boot-starter.version>
     <querydsl.version>5.0.0</querydsl.version>
     <json-webtoken.version>0.11.5</json-webtoken.version>
     <poi.version>5.2.2</poi.version>
@@ -23,22 +22,22 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
-      <version>${spring-boot-starter.version}</version>
+      <version>${version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-security</artifactId>
-      <version>${spring-boot-starter.version}</version>
+      <version>${version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-jpa</artifactId>
-      <version>${spring-boot-starter.version}</version>
+      <version>${version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-jooq</artifactId>
-      <version>${spring-boot-starter.version}</version>
+      <version>${version}</version>
     </dependency>
 
     <!-- QueryDSL -->
@@ -100,7 +99,7 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
-      <version>${spring-boot-starter.version}</version>
+      <version>${version}</version>
       <scope>test</scope>
     </dependency>
 
