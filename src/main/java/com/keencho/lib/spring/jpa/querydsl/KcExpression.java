@@ -58,19 +58,17 @@ public class KcExpression<T> extends FactoryExpressionBase<T> {
 
         try {
             var arr = this.bindings.keySet().toArray();
-
             var rv = this.type.getDeclaredConstructor().newInstance();
+
             for (var i = 0; i < a.length; i ++) {
                 var value = a[i];
                 if (value != null) {
-                    var field = this.type.getDeclaredField((String) arr[i]);
-                    field.setAccessible(true);
-                    field.set(rv, value);
+                    this.setField(rv, (String) arr[i], value);
                 }
             }
 
             return rv;
-        } catch (InstantiationException | IllegalAccessException | NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             throw new ExpressionException(e.getMessage(), e);
         }
     }
@@ -78,5 +76,22 @@ public class KcExpression<T> extends FactoryExpressionBase<T> {
     @Override
     public List<Expression<?>> getArgs() {
         return new ArrayList<>(this.bindings.values());
+    }
+
+    private void setField(T instance, String fieldName, Object value) {
+        Class<?> currentClass = type;
+        while (currentClass != null) {
+            try {
+                var field = currentClass.getDeclaredField(fieldName);
+                field.setAccessible(true);
+                field.set(instance, value);
+                return;
+            } catch (NoSuchFieldException e) {
+                currentClass = currentClass.getSuperclass();
+            } catch (IllegalAccessException e) {
+                throw new ExpressionException(e.getMessage(), e);
+            }
+        }
+        throw new ExpressionException("Field '" + fieldName + "' not found in class hierarchy");
     }
 }

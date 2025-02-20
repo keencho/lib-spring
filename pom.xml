@@ -8,10 +8,10 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.github.keencho</groupId>
   <artifactId>lib-spring</artifactId>
-  <version>3.3.0</version>
+  <version>3.4.2</version>
 
   <properties>
-    <querydsl.version>5.0.0</querydsl.version>
+    <querydsl.version>5.1.0</querydsl.version>
     <json-webtoken.version>0.11.5</json-webtoken.version>
     <poi.version>5.2.2</poi.version>
   </properties>
