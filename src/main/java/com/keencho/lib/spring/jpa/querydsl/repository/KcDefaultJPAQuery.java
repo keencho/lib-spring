@@ -31,6 +31,7 @@ import org.springframework.util.Assert;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 public class KcDefaultJPAQuery<T> implements KcQueryExecutor<T> {
     private final EntityManager entityManager;
@@ -347,6 +348,11 @@ public class KcDefaultJPAQuery<T> implements KcQueryExecutor<T> {
     @Override
     public long update(Predicate predicate, Map<Path<?>, ?> data) {
         return this.doUpdate(predicate, data);
+    }
+
+    @Override
+    public long update(Function<JPAUpdateClause, Long> update) {
+        return update.apply(queryFactory.update(this.path));
     }
 
     private long doUpdate(Predicate predicate, Map<Path<?>, ?> data) {

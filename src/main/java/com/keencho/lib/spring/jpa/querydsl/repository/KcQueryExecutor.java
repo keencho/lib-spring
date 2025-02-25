@@ -6,6 +6,7 @@ import com.querydsl.jpa.impl.JPADeleteClause;
 import com.querydsl.jpa.impl.JPAUpdateClause;
 
 import java.util.Map;
+import java.util.function.Function;
 
 public interface KcQueryExecutor<T> extends KcSearchQuery<T> {
 
@@ -14,6 +15,8 @@ public interface KcQueryExecutor<T> extends KcSearchQuery<T> {
     long updateOne(Predicate predicate, Map<Path<?>, ?> data);
 
     long update(Predicate predicate, Map<Path<?>, ?> data);
+
+    long update(Function<JPAUpdateClause, Long> update);
 
     JPADeleteClause createDeleteClause();
 
